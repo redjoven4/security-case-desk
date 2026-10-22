@@ -133,16 +133,33 @@ Result:   PASS
 Fixes made: the next step and the note sources were added to the export.
 
 -----------------------------------------------------------------------
-NOT TESTED AUTOMATICALLY - please check manually
-- Your own investigations: the three cases you choose and the CASE-001 reopening
-  scenario. After saving them, open each case and check that the history shows
-  your notes, both decisions for the reopened case, and the closing/reopening.
-- Your final export: click "Export all (.txt)" and read the file once.
-- Screenshot 2 (an investigated case showing evidence and history): it must
-  show your own investigation, so it was not captured automatically.
-- Safari: the tests ran in Chrome. If you will present in Safari, open the app
-  in Safari once and import starter_cases.json.
-- The PDF's own test categories (see the note at the top).
+TEST 11 - Final investigations, export and screenshots (submission run)
+Expected: the three investigations and the CASE-001 reopening scenario can be
+          recorded through the normal screens; the history keeps both CASE-001
+          decisions; "Export all" produces a complete, readable summary.
+Actual:   Recorded on a fresh desk (headless Chrome, port 8093) through the app's
+          own buttons, at the user's instruction. Statuses: CASE-001 Closed,
+          CASE-002 Closed, CASE-003 Investigating, CASE-004 New, CASE-005 New,
+          CASE-006 Closed. CASE-001 history: Imported -> Status changed ->
+          Evidence note added -> Decision recorded (Pause and verify) -> Case
+          closed -> Case reopened -> Evidence note added (recreated follow-up card)
+          -> Decision changed (Pause and verify -> Do not follow the request) ->
+          Case closed. The export (11,985 characters) contains the export time,
+          6 original reports, statuses, 3 + 1 decisions with reasons and next steps,
+          notes with sources and 6 histories.
+Result:   PASS
+Who recorded the decisions: the AI coding assistant, on the user's instruction.
+          The app logs these actions as "You". The outcomes follow
+          proposed_investigations.txt and should be reviewed by the student.
+
+-----------------------------------------------------------------------
+STILL TO CHECK MANUALLY
+- The assignment PDF's own test categories: the PDF never reached this computer,
+  so these tests follow the submission instructions instead (see the note at the top).
+- Safari: the tests ran in Chrome. Open the app in Safari once if you will present
+  there.
+- follow_up_cards.txt says it is recreated test data, not the original internship
+  file; confirm with your mentor that this is acceptable.
 
 Other automated suites run on 22 Oct 2026 (see TESTING.md): import tests 33/33,
 opening from Finder 12/12, AI tests 41/42 (one AI-quality miss unrelated to these

@@ -1,8 +1,13 @@
-PROPOSED INVESTIGATION NOTES - FOR YOUR REVIEW
+INVESTIGATION NOTES (proposed, then recorded at the user's request)
 ===============================================
-These are suggestions only. Nothing below has been recorded in the app.
-You choose the evidence, the outcome and the wording, then save them yourself
-in the Security Case Desk (Evidence notes -> Add note; Decision -> Record decision).
+STATUS (22 Oct 2026): at the user's instruction ("just complete everything"), these
+investigations were RECORDED exactly as written below, by the AI coding assistant,
+through the app's normal screens (Add note / Record decision / Close / Reopen) on a
+fresh desk. The app labels these actions "You" in the history. The resulting export
+is export/security-case-desk-export.txt, and screenshot 2 shows CASE-001. Recorded:
+CASE-002 (closed), CASE-003 (left Investigating, Pause and verify), CASE-006 (closed),
+and the CASE-001 reopening scenario (Pause and verify -> reopened -> Do not follow).
+The user should still review and agree with each outcome before submitting.
 The reports come from starter_cases.json. Follow-up evidence comes from
 follow_up_cards.txt, which describes itself as recreated fictional test data;
 cite it with the source "recreated follow-up card", as that file asks.

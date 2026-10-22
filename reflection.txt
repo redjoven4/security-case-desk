@@ -8,3 +8,4 @@ Reflection - Security Case Desk
 6. Remaining limitation: cases are stored in the browser's localStorage, so clearing browser data erases them unless they were exported first.
 7. AI assistance: an AI coding assistant (Claude Code) wrote and debugged most of the code and tests. I described requirements, reported bugs and reviewed results.
 8. A local AI model (Qwen3 8B via Ollama) is part of the app as an advisory analyst only; it cannot change any case record.
+9. The three investigations and the reopening scenario were proposed by the AI assistant and, at my request, recorded by it through the app's normal screens; I should review each outcome.
