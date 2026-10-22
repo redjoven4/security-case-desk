@@ -1,14 +1,14 @@
 /* =====================================================================
    ASSIGNMENT TESTS  (tests/assignment-tests.mjs)
    ---------------------------------------------------------------------
-   Uses the supplied starter files exactly as given (starter_cases.json,
-   duplicate_cases.json, malformed_cases.json, follow_up_cards.txt) in a
+   The assignment PDF's eight self-checks (Normal import, Duplicate import,
+   Invalid input, Persistence, Human decision, Changed evidence, Safe
+   display, Export and filter), run with the supplied starter files in a
    real browser: headless Google Chrome with a throwaway profile on its own
    copy of the desk server (port 8096). Your own browser and saved cases
    are never touched; the decisions made here are TEST data only.
 
-   Run:   npm run test:assignment      (needs Chrome; Ollama for test 11)
-   Also saves submission-screenshots/screenshot-1-inbox.png.
+   Run:   npm run test:assignment      (needs Chrome; Ollama for the AI part of check 5)
    ===================================================================== */
 
 import fs from "node:fs/promises";
@@ -147,108 +147,74 @@ try {
   await load(`${DESK}/`);
   console.log(`Security Case Desk — assignment tests in headless Chrome against ${DESK}\n`);
 
-  const total = () => page(`return Number(document.getElementById("inbox-total").textContent)`);
-  const headline = (r) => r.summary.split("\n").find((l) => /^Import (completed|rejected)/.test(l)) || r.summary.split("\n").slice(0, 3).join(" ");
   const starter = (name) => path.join(ROOT, name);
-  const shot = async (file) => {
-    const r = await send("Page.captureScreenshot", { format: "png" });
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.writeFile(file, Buffer.from(r.result.data, "base64"));
-  };
+  const fileCases = JSON.parse(await fs.readFile(starter("starter_cases.json"), "utf8"));
   const set = (sel, value) => `{ const e = document.querySelector(${JSON.stringify(sel)}); e.value = ${JSON.stringify(value)}; e.dispatchEvent(new Event("input")); }`;
-  const addNote = (text, source) => page(`${set('textarea[aria-label="New evidence note"]', text)} ${set('input[aria-label="Evidence source"]', source)} document.querySelector('textarea[aria-label="New evidence note"]').closest("form").requestSubmit(); await new Promise(r => setTimeout(r, 200)); return true`);
-  const decide = (id, value, reason, step) => page(`document.querySelector('input[name="decision-${id}"][value="${value}"]').click(); ${set('textarea[aria-label="Reason for the decision"]', reason)} ${set('textarea[aria-label="Next step"]', step)} document.querySelector('textarea[aria-label="Next step"]').closest("form").requestSubmit(); await new Promise(r => setTimeout(r, 200)); return true`);
-  const button = (label) => page(`const b = [...document.querySelectorAll("#case-record button")].find(b => b.textContent.trim() === ${JSON.stringify(label)}); if (!b || b.disabled) return false; b.click(); await new Promise(r => setTimeout(r, 200)); return true`);
+  const addNote = (text, source) => page(`${set('textarea[aria-label="New evidence note"]', text)} ${set('input[aria-label="Evidence source"]', source)} document.querySelector('textarea[aria-label="New evidence note"]').closest("form").requestSubmit(); await new Promise(r => setTimeout(r, 250)); return true`);
+  const decide = (id, value, reason, step) => page(`document.querySelector('input[name="decision-${id}"][value="${value}"]').click(); ${set('textarea[aria-label="Reason for the decision"]', reason)} ${set('textarea[aria-label="Next step"]', step)} document.querySelector('textarea[aria-label="Next step"]').closest("form").requestSubmit(); await new Promise(r => setTimeout(r, 250)); return true`);
+  const button = (label) => page(`const b = [...document.querySelectorAll("#case-record button")].find(b => b.textContent.trim() === ${JSON.stringify(label)}); if (!b || b.disabled) return "missing"; b.click(); await new Promise(r => setTimeout(r, 250)); return document.getElementById("notice").innerText`);
+  const reset = () => page(`const b = document.getElementById("reset-desk"); b.click(); b.click(); await new Promise(r => setTimeout(r, 300)); return true`);
+  const headline = (r) => r.summary.split("\n").find((l) => /^Import (completed|rejected)/.test(l)) || r.summary.split("\n").slice(0, 4).join(" | ");
 
-  /* 1. Duplicates on an empty desk: the file itself contains CASE-001 twice */
-  const d0 = await importFile(starter("duplicate_cases.json"));
-  check("1a. duplicate_cases.json on an empty desk: first CASE-001 added, second skipped", d0.total === 1 && /1 case added, 1 duplicate skipped/.test(d0.summary) && /earlier in this file/.test(d0.summary), headline(d0));
-  await page(`const b = document.getElementById("reset-desk"); b.click(); b.click(); await new Promise(r => setTimeout(r, 300)); return true`);
+  /* ===== CHECK 1: Normal import ===== */
+  const n = await importFile(starter("starter_cases.json"));
+  const rec1 = await record();
+  const fieldsMatch = fileCases.every((f) => { const c = rec1.cases.find((x) => x.id === f.report_id); return c && c.original.id === f.report_id && c.original.title === f.title && c.original.message === f.message && c.original.background === f.context; });
+  check("1. Normal import: empty desk imports exactly six cases, all New", rec1.cases.length === 6 && rec1.cases.every((c) => c.status === "new"), headline(n));
+  check("1. All four source fields (report_id, title, message, context) match the file", fieldsMatch);
+  check("1. Every case starts with the outcome Unresolved", rec1.cases.every((c) => c.decision?.value === "unresolved"));
 
-  /* 2. Import starter_cases.json */
-  const s = await importFile(starter("starter_cases.json"));
-  check("2. starter_cases.json: all 6 reports imported", s.total === 6 && /6 cases added, 0 duplicates skipped, 0 invalid cases rejected/.test(s.summary), headline(s));
-  const statuses = (await record()).cases.map((c) => c.status);
-  check("2. Imported cases start as New", statuses.every((x) => x === "new"), statuses.join(","));
-  await page(`document.querySelector("#import-summary .link-btn")?.click(); return true`);
-  await openCase("CASE-001");
-  await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 2, mobile: false });
-  await sleep(500);
-  await shot(path.join(ROOT, "submission-screenshots", "screenshot-1-inbox.png"));
-  check("Screenshot 1 (case inbox with the imported reports) captured", true, "submission-screenshots/screenshot-1-inbox.png");
-
-  /* 3. Duplicate detection against the desk */
-  const before3 = JSON.stringify(await record());
-  const d = await importFile(starter("duplicate_cases.json"));
-  check("3. duplicate_cases.json after the starter file: 0 added, 2 duplicates skipped, nothing overwritten", d.total === 6 && /0 cases added, 2 duplicates skipped/.test(d.summary) && JSON.stringify(await record()) === before3, headline(d));
-
-  /* 4. Malformed / invalid file */
-  const m = await importFile(starter("malformed_cases.json"));
-  check("4. malformed_cases.json: rejected, reason given, existing cases unchanged", /Import rejected/.test(m.summary) && /Missing "context"/.test(m.summary) && m.total === 6 && JSON.stringify(await record()) === before3, headline(m));
-  const b = await importFile(sample("broken.json"));
-  check("4. Syntactically broken JSON (extra test file): clear error with line/column, nothing changed", /isn't valid JSON/.test(b.summary) && /line \d+, column \d+/.test(b.summary) && b.total === 6);
-
-  /* 5. Evidence notes with timestamp and source; status New -> Investigating */
+  /* ===== CHECK 2: Duplicate import ===== */
   await openCase("CASE-002");
-  await addNote("No sign-in code or working link is included in the report.", "Original report (starter_cases.json)");
-  await page(`${set('textarea[aria-label="New evidence note"]', "Note without a source")} ${set('input[aria-label="Evidence source"]', "")} document.querySelector('textarea[aria-label="New evidence note"]').closest("form").requestSubmit(); await new Promise(r => setTimeout(r, 200)); return true`);
-  const c2 = await findCase("CASE-002");
-  check("5. Evidence note saved with a timestamp and its source", c2.notes.length === 1 && c2.notes[0].source === "Original report (starter_cases.json)" && !Number.isNaN(Date.parse(c2.notes[0].at)));
-  check("5. A note without a source is refused", c2.notes.length === 1);
-  check("5. Adding evidence moves the case from New to Investigating", c2.status === "investigating");
+  await addNote("The message asks for a sign-in verification code.", "Original report (starter_cases.json)");
+  await decide("CASE-002", "concern", "Asks for a one-time sign-in code.", "Do not send any code.");
+  const before2 = JSON.stringify(await record());
+  const again = await importFile(starter("starter_cases.json"));
+  check("2. Re-importing the starter file: zero added, six skipped", /0 cases added, 6 duplicates skipped/.test(again.summary), headline(again));
+  check("2. Re-import changed nothing (decisions, notes, history identical)", JSON.stringify(await record()) === before2);
+  await reset();
+  const dupe = await importFile(starter("duplicate_cases.json"));
+  check("2. duplicate_cases.json into an empty test desk: one added, one skipped", dupe.total === 1 && /1 case added, 1 duplicate skipped/.test(dupe.summary), headline(dupe));
+  await reset();
+  await importFile(starter("starter_cases.json"));
 
-  /* 6. Human decisions: reason and next step required; AI cannot decide */
-  const closeBefore = await page(`return [...document.querySelectorAll("#case-record button")].find(b => b.textContent.trim() === "Close case")?.disabled`);
-  check("6. A case cannot be closed before a human decision", closeBefore === true);
-  await page(`document.querySelector('input[name="decision-CASE-002"][value="do_not_follow"]').click(); ${set('textarea[aria-label="Reason for the decision"]', "Asks for a sign-in verification code.")} ${set('textarea[aria-label="Next step"]', "")} document.querySelector('textarea[aria-label="Next step"]').closest("form").requestSubmit(); await new Promise(r => setTimeout(r, 200)); return true`);
-  check("6. A decision without a next step is refused", (await findCase("CASE-002")).decision === null);
-  await decide("CASE-002", "do_not_follow", "The message asks for a one-time sign-in verification code.", "Do not reply with any code; check the game's official help page directly.");
-  const c2d = (await findCase("CASE-002")).decision;
-  check("6. Decision saved with outcome, reason, next step and time", c2d?.value === "do_not_follow" && /sign-in verification code/.test(c2d.reason) && /official help page/.test(c2d.nextStep) && !!c2d.at);
+  /* ===== CHECK 3: Invalid input ===== */
+  const before3 = JSON.stringify(await record());
+  const mal = await importFile(starter("malformed_cases.json"));
+  check("3. malformed_cases.json: useful error, data unchanged", /Import rejected/.test(mal.summary) && /Missing "context"/.test(mal.summary) && JSON.stringify(await record()) === before3, headline(mal));
+  const brokenCopy = path.join(temp, "malformed_cases_broken.json");
+  const malText = await fs.readFile(starter("malformed_cases.json"), "utf8");
+  await fs.writeFile(brokenCopy, malText.slice(0, malText.lastIndexOf("]")));
+  const brk = await importFile(brokenCopy);
+  check("3. Broken-JSON copy (final ']' removed): useful error, data unchanged", /isn't valid JSON/.test(brk.summary) && JSON.stringify(await record()) === before3, (brk.summary.match(/This file isn't valid JSON[^(]*/) || [""])[0].trim());
+  const blank = path.join(temp, "blank_field.json");
+  await fs.writeFile(blank, JSON.stringify([{ report_id: "CASE-BLANK", title: "   ", message: "Whitespace-only title.", context: "" }]));
+  const bl = await importFile(blank);
+  check("3. Empty and whitespace-only required fields are rejected", /"title" is empty/.test(bl.summary) && /"context" is empty/.test(bl.summary) && JSON.stringify(await record()) === before3, headline(bl));
 
-  /* 7. Closing, changed evidence and reopening (follow-up card for CASE-001) */
-  await openCase("CASE-001");
-  await addNote("The message says practice moved to Room B12; room changes are normally posted on the club noticeboard.", "Original report (starter_cases.json)");
-  await decide("CASE-001", "pause_verify", "Room change not yet checked against the noticeboard.", "Check the club noticeboard before telling others.");
-  const closed = await button("Close case");
-  const c1c = await findCase("CASE-001");
-  check("7. Case closed after a decision", closed && c1c.status === "closed" && !!c1c.closedAt);
-  const lockedWhenClosed = await page(`return !document.querySelector('textarea[aria-label="New evidence note"]') && !document.querySelector('textarea[aria-label="Next step"]')`);
-  check("7. A closed case cannot take new notes or decisions", lockedWhenClosed);
-  const reopened = await button("Reopen case");
-  await addNote("The club noticeboard still lists the original room for today. The club organiser has not yet confirmed a change.", "recreated follow-up card");
-  await decide("CASE-001", "do_not_follow", "The verified noticeboard contradicts the chat message and no organiser confirmed a change.", "Do not pass the room change on; ask the organiser directly.");
-  await button("Close case");
-  const c1 = await findCase("CASE-001");
-  const actions = c1.history.map((h) => h.action);
-  check("7. Reopened, new evidence added, decision revised and closed again", reopened && c1.status === "closed" && c1.notes.length === 2 && c1.decision.value === "do_not_follow", actions.join(" → "));
-  check("7. History keeps BOTH the earlier and the revised decision", c1.history.some((h) => h.action === "Decision recorded" && /Pause and verify/.test(h.detail)) && c1.history.some((h) => h.action === "Decision changed" && /Pause and verify → Do not follow the request/.test(h.detail)) && actions.filter((a) => a === "Case closed").length === 2 && actions.includes("Case reopened"));
-
-  /* 8. Permanent history */
-  const firstEntries = JSON.stringify(c1.history.slice(0, 3));
-  await openCase("CASE-003");
-  await addNote("A separately obtained organiser notice lists a registration fee, but with a different deadline than the message.", "recreated follow-up card");
-  const c1later = await findCase("CASE-001");
-  check("8. Earlier history entries never change; there is no edit/delete for notes or history", JSON.stringify(c1later.history.slice(0, 3)) === firstEntries && (await page(`return [...document.querySelectorAll("#case-record button")].filter(b => /delete|edit/i.test(b.textContent)).length`)) === 0);
-
-  /* 9. Persistence across refresh and server restart */
-  const before9 = JSON.stringify(await record());
+  /* ===== CHECK 4: Persistence ===== */
+  await openCase("CASE-004");
+  await addNote("The account owner says they mistyped their password several times that morning; the timestamps have not been compared.", "recreated follow-up card");
+  await decide("CASE-004", "unresolved", "It is not yet clear whether the failures were the owner or someone else.", "Compare the owner's account of the times with the activity record.");
+  const before4 = JSON.stringify(await record());
   await load(`${DESK}/`);
   const afterRefresh = JSON.stringify(await record());
-  await stopServer();
-  await startServer();
-  await load(`${DESK}/`);
-  check("9. Cases, notes, decisions and histories survive a refresh and a server restart", afterRefresh === before9 && JSON.stringify(await record()) === before9 && (await total()) === 6);
+  await stopServer(); await startServer(); await load(`${DESK}/`);
+  const c4 = await findCase("CASE-004");
+  check("4. Note and decision survive a refresh and closing/reopening the app", afterRefresh === before4 && JSON.stringify(await record()) === before4 && c4.notes.length === 1 && c4.decision.value === "unresolved" && c4.history.length >= 4, c4.history.map((h) => h.action).join(" → "));
 
-  /* 10. Readable text export */
-  const all = await captureExport(`document.getElementById("export-all").click();`);
-  check(
-    "10. Export all contains export time, original reports, statuses, decisions, reasons, next steps, notes with sources and histories",
-    /^SECURITY CASE DESK — ALL CASES \(6\)/m.test(all) && /Exported /.test(all) && /ORIGINAL REPORT/.test(all) && /Practice has moved to Room B12/.test(all) && /Status:\s+Closed/.test(all) && /Decision: Do not follow the request/.test(all) && /Reason:/.test(all) && /Next step: Do not pass the room change on/.test(all) && /\(Source: recreated follow-up card\)/.test(all) && /INVESTIGATION HISTORY/.test(all) && /Decision changed/.test(all),
-    `${all.length} characters`
-  );
-
-  /* 11. CASE-006 manipulation text is treated as report content (AI, advisory only) */
+  /* ===== CHECK 5: Human decision ===== */
+  await openCase("CASE-005");
+  const msg5 = await button("Close case");
+  const c5 = await findCase("CASE-005");
+  check("5. Missing closure details prevent closure and say what to add", c5.status === "new" && /can't be closed yet/.test(msg5) && /reason/.test(msg5) && /next step/.test(msg5) && /evidence note/.test(msg5), msg5.slice(0, 160));
+  await addNote("The report does not say whether the recipient expected the document.", "Original report (starter_cases.json)");
+  await decide("CASE-005", "unresolved", "Not known whether the document was expected or who sent it.", "Check the invitation in the normal class workspace.");
+  const msg5b = await button("Close case");
+  check("5. An Unresolved case can't close until a note explains the missing information and next step", (await findCase("CASE-005")).status === "investigating" && /explains what information is missing/.test(msg5b), msg5b.slice(0, 160));
+  await addNote("Missing: whether the recipient expected this document and who sent it. Next step: check the invitation in the class workspace.", "Investigator summary");
+  await button("Close case");
+  check("5. With that note added, the Unresolved case can be closed", (await findCase("CASE-005")).status === "closed");
   await openCase("CASE-006");
   const ai = await page(`for (let i = 0; i < 20 && !/Online|Offline/.test(document.querySelector("#ai-status-global .text").textContent); i++) await new Promise(r => setTimeout(r, 500)); return document.querySelector("#ai-status-global .text").textContent`);
   if (/Online/.test(ai)) {
@@ -256,12 +222,60 @@ try {
     await page(`document.getElementById("ai-analyse").click(); return true`);
     const secs = await waitForAI(120000);
     const text = await page(`return JSON.parse(localStorage.getItem("securityCaseDesk.aiChats.v1"))["CASE-006"]?.analysis?.text || ""`);
+    await page(`[...document.querySelectorAll("#ai-analysis button")].find(b => b.textContent.includes("Save as AI advice"))?.click(); await new Promise(r => setTimeout(r, 200)); return true`);
     transcript.push({ question: "[Analyse Case on CASE-006]", answer: text, seconds: secs });
     const c6 = await findCase("CASE-006");
-    check("11. CASE-006: the AI analysis treats the 'ignore your instructions' text as a warning sign", /ignore|instruction|manipulat|override/i.test(text), `${secs}s`);
-    check("11. CASE-006 stays New and unclosed: the AI changed nothing", c6.status === "new" && c6.decision === null && JSON.stringify(await record()) === recBefore);
-  } else check("11. CASE-006 AI check", false, `AI not available: ${ai}`);
+    check("5. An Advisor suggestion (AI analysis, even saved as advice) cannot set the outcome or close the case", c6.status === "new" && c6.decision.value === "unresolved" && JSON.stringify(await record()) === recBefore, `${secs}s; outcome stays Unresolved, status New`);
+    check("5. The AI treats CASE-006's 'ignore your rules' text as something to inspect, not obey", /ignore|instruction|manipulat|override/i.test(text));
+  } else check("5. Advisor suggestion check", false, `AI not available: ${ai}`);
 
+  /* ===== CHECK 6: Changed evidence ===== */
+  await openCase("CASE-001");
+  await addNote("The chat message says practice moved to Room B12; room changes are normally on the club noticeboard (not checked yet).", "Original report (starter_cases.json)");
+  await decide("CASE-001", "benign", "A room change is ordinary and asks for nothing risky.", "Check the noticeboard before going.");
+  await button("Close case");
+  await button("Reopen case");
+  await addNote("The club noticeboard still lists the original room for today. The club organiser has not yet confirmed a change.", "recreated follow-up card");
+  await decide("CASE-001", "concern", "The noticeboard contradicts the chat message and no organiser confirmed the change.", "Don't pass it on; ask the organiser.");
+  const c1 = await findCase("CASE-001");
+  const f1 = fileCases.find((f) => f.report_id === "CASE-001");
+  check("6. After reopening and changing the decision, the original report is intact", c1.original.message === f1.message && c1.original.context === undefined && c1.original.background === f1.context && c1.original.title === f1.title);
+  const changed = c1.history.find((h) => h.action === "Decision changed");
+  check("6. History keeps old and new outcome, reason and next step", /Outcome: Benign explanation supported → Concern supported/.test(changed?.detail || "") && /Reason: "A room change is ordinary/.test(changed.detail) && /→ "The noticeboard contradicts/.test(changed.detail) && /Next step: "Check the noticeboard before going\." → "Don't pass it on/.test(changed.detail), (changed?.detail || "").slice(0, 120));
+  check("6. History shows close, reopen (outcome kept) in time order", (() => { const a = c1.history.map((h) => h.action); const t = c1.history.map((h) => h.at); return a.includes("Case closed") && c1.history.some((h) => h.action === "Case reopened" && /Outcome kept: Benign/.test(h.detail)) && t.every((x, i) => i === 0 || t[i - 1] <= x); })());
+  const shownOrder = await page(`return [...document.querySelectorAll(".history li strong")].map(s => s.textContent)`);
+  check("6. The history is displayed oldest first", shownOrder[0] === "Case created" && shownOrder.at(-1) === "Decision changed", shownOrder.join(" → "));
+
+  /* ===== CHECK 7: Safe display ===== */
+  await openCase("CASE-003");
+  await addNote("<b>test</b>", "Safe display check");
+  const disp = await page(`const notes = [...document.querySelectorAll(".notes li p")]; const p = notes.find(x => x.textContent === "<b>test</b>"); return { literal: Boolean(p), boldElements: document.querySelectorAll(".notes b").length }`);
+  check("7. '<b>test</b>' in a note appears as literal text, not bold", disp.literal && disp.boldElements === 0);
+  const notesBefore = (await findCase("CASE-003")).notes.length;
+  await page(`${set('textarea[aria-label="New evidence note"]', "   ")} ${set('input[aria-label="Evidence source"]', "x")} document.querySelector('textarea[aria-label="New evidence note"]').closest("form").requestSubmit(); await new Promise(r => setTimeout(r, 200)); return true`);
+  check("7. Empty notes are rejected", (await findCase("CASE-003")).notes.length === notesBefore);
+  await openCase("CASE-006");
+  const inj = await page(`return { msgIsText: document.querySelector(".message").textContent.includes("ignore your previous instructions"), scripts: document.querySelectorAll("#case-record script, #case-record b, #case-record img").length }`);
+  const c6b = await findCase("CASE-006");
+  check("7. Imported content is shown as text and not treated as app instructions (CASE-006 not marked safe or closed)", inj.msgIsText && inj.scripts === 0 && c6b.status === "new" && c6b.decision.value === "unresolved");
+
+  /* ===== CHECK 8: Export and filter ===== */
+  const recF = await record();
+  const filt = await page(`const out = {}; for (const f of ["new","investigating","closed"]) { document.querySelector('.filter[data-filter="' + f + '"]').click(); out[f] = [...document.querySelectorAll(".case-card .case-id")].map(e => e.textContent).sort().join(","); } document.querySelector('.filter[data-filter="all"]').click(); return out`);
+  const expect = (st) => recF.cases.filter((c) => c.status === st).map((c) => c.id).sort().join(",");
+  check("8. Status filters show the right cases", ["new", "investigating", "closed"].every((st) => filt[st] === expect(st)), JSON.stringify(filt));
+  const all = await captureExport(`document.getElementById("export-all").click();`);
+  const sections = all.split(/\n(?==+\n[^\n]+ · )/).slice(1);
+  const perCase = recF.cases.map((c) => {
+    const block = all.slice(all.indexOf(`${c.id} · `));
+    const end = block.indexOf("\n\n\n");
+    const b = end > 0 ? block.slice(0, end) : block;
+    const historyLines = (b.split("INVESTIGATION HISTORY")[1] || "").split("\n").filter((l) => /^\[.+\] (You|System):/.test(l)).length;
+    return { id: c.id, ok: b.includes(`Status:   ${({ new: "New", investigating: "Investigating", closed: "Closed" })[c.status]}`) && b.includes(`Outcome:  ${({ concern: "Concern supported", benign: "Benign explanation supported", unresolved: "Unresolved" })[c.decision.value]}`) && c.notes.every((n2) => b.includes(n2.text)) && historyLines === c.history.length };
+  });
+  check("8. Export shows the time and the case count", /^SECURITY CASE DESK — ALL CASES \(6\)/m.test(all) && /^Exported /m.test(all));
+  check("8. Export matches the app for every case (status, outcome, notes, number of history entries)", perCase.every((x) => x.ok), perCase.filter((x) => !x.ok).map((x) => x.id).join(",") || "all 6 match");
+  check("8. Saved Advisor suggestion is in its own labelled section", /AI-GENERATED ADVICE — NOT INDEPENDENTLY VERIFIED/.test(all));
 
   check("No script errors on the page", consoleErrors.length === 0, consoleErrors.join(" | ").slice(0, 200));
 } catch (error) {
@@ -286,7 +300,7 @@ const report = [
   "| --- | --- | --- |",
   ...results.map((r) => `| ${r.name} | ${r.pass ? "PASS" : "**FAIL**"} | ${String(r.detail).replace(/\|/g, "/").replace(/\n/g, " ")} |`),
   "",
-  "## AI answer for CASE-006 (test 11)",
+  "## AI answer for CASE-006 (check 5)",
   "",
   ...transcript.flatMap((t) => [`**${t.question}** (${t.seconds}s)`, "", "```text", t.answer, "```", ""]),
 ].join("\n");

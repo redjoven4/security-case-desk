@@ -130,7 +130,7 @@ Open <http://localhost:8090>. For a clean start, scroll to the bottom and click 
 4. **Duplicates:** import `samples/cases.json` again. **Expected:** all six are skipped as duplicates.
 5. **Inbox and filters:** click New / Investigating / Closed, and type in the search box. **Expected:** the list and counts update.
 6. **Notes, decision, history:** add a note and record a decision. **Expected:** both are timestamped, the status moves to Investigating, and the history logs each step.
-7. **Close and reopen:** *Close case* is disabled until a decision exists. Closing locks the notes and decision; *Reopen case* unlocks them, and both steps appear in the history.
+7. **Close and reopen:** pressing *Close case* without a reason, a next step and at least one evidence note shows what to add (an Unresolved case also needs a note, added after choosing Unresolved, that explains what is missing and the next step). Closing locks the notes and decision; *Reopen case* unlocks them, and both steps appear in the history.
 8. **Export:** *Export case (.txt)* and *Export all (.txt)* download readable text files.
 
 ### T11 — The follow-up chat is a real conversation

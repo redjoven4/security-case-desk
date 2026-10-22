@@ -606,3 +606,14 @@ textarea:disabled { background: var(--surface-2); opacity: 0.7; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Assignment outcomes: Concern supported / Benign explanation supported / Unresolved */
+.badge.decision-concern::before { background: #C4675B; }
+.badge.decision-benign::before { background: #4E9A7E; }
+.badge.decision-unresolved::before { background: #C8902E; }
+.current-decision.decision-concern { border-left-color: #C4675B; }
+.current-decision.decision-benign { border-left-color: #4E9A7E; }
+.current-decision.decision-unresolved { border-left-color: #C8902E; }
+.decision-option.decision-concern:has(input:checked) { border-color: var(--red-line); background: var(--red-bg); }
+.decision-option.decision-benign:has(input:checked) { border-color: var(--green-line); background: var(--green-bg); }
+.decision-option.decision-unresolved:has(input:checked) { border-color: var(--amber-line); background: var(--amber-bg); }

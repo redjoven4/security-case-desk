@@ -17,18 +17,20 @@ A security investigation desk for message-based reports: phishing emails, gaming
 | Case inbox with status filters (All / New / Investigating / Closed) and search | Left column |
 | Original case information (read-only, never edited) | "Original report" card |
 | Evidence notes (yours, timestamped, can't be edited or deleted) | "Evidence notes" card |
-| Manual decision: *No warning needed* / *Pause and verify* / *Do not follow the request* | "Decision" card |
+| Manual outcome: *Concern supported* / *Benign explanation supported* / *Unresolved* (every case starts Unresolved), with a reason and a safe next step | "Decision" card |
 | Investigation history (automatic log of every action) | "Investigation history" card |
 | Saved in the browser (localStorage) — survives restarts | automatic |
-| Close and reopen cases (closing needs a decision first) | Buttons at the top of a case |
+| Close and reopen cases (closing needs a reason, a next step and at least one evidence note; an Unresolved case also needs a note explaining what is missing and the next step) | Buttons at the top of a case |
 | Text export of one case or all cases | **Export case (.txt)** / **Export all (.txt)** |
 | **AI Security Analyst** (optional): analysis, follow-up chat, saved AI advice | Right-hand panel |
 
-### The three decisions
+### The three outcomes
 
-- **No warning needed** — nothing in the supplied evidence justifies a warning. This does *not* prove the message is safe.
-- **Pause and verify** — the request could be genuine, but check it through a trusted route before doing anything.
-- **Do not follow the request** — doing what the message asks would itself put someone at real risk, whoever sent it.
+- **Concern supported** — the evidence supports a security concern.
+- **Benign explanation supported** — the evidence supports a harmless explanation.
+- **Unresolved** — the supplied facts don't settle it yet. Every case starts here. To close an Unresolved case, first add an evidence note explaining what information is missing and the next step.
+
+Every change of outcome, reason or next step is logged in the history with the old and new values; the history is shown in time order (oldest first).
 
 ---
 

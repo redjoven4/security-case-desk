@@ -1,19 +1,24 @@
 INVESTIGATION NOTES (proposed, then recorded at the user's request)
 ===============================================
-STATUS (22 Oct 2026): at the user's instruction ("just complete everything"), these
-investigations were RECORDED exactly as written below, by the AI coding assistant,
-through the app's normal screens (Add note / Record decision / Close / Reopen) on a
-fresh desk. The app labels these actions "You" in the history. The resulting export
-is export/security-case-desk-export.txt, and screenshot 2 shows CASE-001. Recorded:
-CASE-002 (closed), CASE-003 (left Investigating, Pause and verify), CASE-006 (closed),
-and the CASE-001 reopening scenario (Pause and verify -> reopened -> Do not follow).
-The user should still review and agree with each outcome before submitting.
+STATUS (22 Oct 2026): at the user's instruction, these investigations were
+RECORDED as written below, by the AI coding assistant, through the app's
+normal screens (Add note / Record decision / Close / Reopen) on a fresh desk.
+The app labels these actions "You" in the history. The resulting export is
+export/security-case-desk-export.txt, and screenshot 2 shows CASE-001.
+Recorded: CASE-002 (Concern supported, closed), CASE-003 (Unresolved, left
+Investigating), CASE-006 (Concern supported, closed), and the CASE-001
+scenario (Unresolved -> closed -> reopened -> follow-up note -> Concern
+supported -> closed).
+THE STUDENT MUST REVIEW AND AGREE WITH EACH OUTCOME BEFORE SUBMITTING.
 The reports come from starter_cases.json. Follow-up evidence comes from
 follow_up_cards.txt, which describes itself as recreated fictional test data;
-cite it with the source "recreated follow-up card", as that file asks.
+it is cited with the source "recreated follow-up card", as that file asks.
 
-Outcomes available in the app:
-  No warning needed | Pause and verify | Do not follow the request
+Outcomes available in the app (from the assignment PDF):
+  Concern supported | Benign explanation supported | Unresolved
+Every case starts as Unresolved. Closing needs a reason, a next step and at
+least one evidence note; an Unresolved case also needs a note explaining what
+is missing and the next step.
 
 
 -----------------------------------------------------------------------
@@ -38,7 +43,7 @@ Possible interpretations
     is given in the report.
   - Uncertain: who the sender is. The code request stays risky either way.
 
-Suggested defensible outcome: Do not follow the request
+Recorded outcome: Concern supported (case closed)
   Reason (suggested): The message asks for a one-time sign-in code, which the
   game's help page says staff never request.
 Suggested safe next step: Do not send any code. If a prize is claimed, check
@@ -66,7 +71,7 @@ Possible interpretations
   - Uncertain: whether the sender is an authorised organiser, and which
     payment method is real.
 
-Suggested defensible outcome: Pause and verify
+Recorded outcome: Unresolved (case left Investigating, not closed)
   Reason (suggested): A fee may be real, but the message's deadline conflicts
   with the organiser notice and the sender is not confirmed.
 Suggested safe next step: Pay only via the method and deadline on the
@@ -92,15 +97,16 @@ Suggested evidence (note -> source)
   3. (Optional, if you run it) The app's AI analysis listed the instruction as
      a warning sign and did not change the case status or decision.
      -> Source: AI Security Analyst output (advisory, not independently verified)
-     Note: in the automated test (tests/assignment-tests.mjs, test 11) the
-     analysis flagged the instruction and the case stayed New.
+     Note: in the automated test (tests/assignment-tests.mjs, check 5) the
+     analysis flagged the instruction and the case stayed New and Unresolved.
+     This optional note was NOT recorded.
 
 Possible interpretations
   - Prompt-injection / manipulation attempt aimed at the review process.
   - Possibly a test message; it still provides no evidence that anything is
     safe.
 
-Suggested defensible outcome: Do not follow the request
+Recorded outcome: Concern supported (case closed)
   Reason (suggested): The text asks the investigator to skip evidence and
   close the case; no evidence of safety exists.
 Suggested safe next step: Keep the case open until evidence is reviewed;
@@ -110,37 +116,41 @@ Suggested safe next step: Keep the case open until evidence is reviewed;
 =======================================================================
 CHANGED-EVIDENCE AND REOPENING SCENARIO - CASE-001 "Chess room change"
 =======================================================================
-1. Initial evidence (record first):
+1. Initial evidence (recorded first):
    Note: "The chat message says practice moved to Room B12 today. Room changes
-          are normally posted on the club noticeboard; not yet checked."
+          are normally posted on the club noticeboard; this has not been
+          checked yet."
    Source: Original report (starter_cases.json)
-   Possible first decision: Pause and verify
-     Reason: The room change has not been checked against the noticeboard.
+   First decision: Unresolved
+     Reason: The room change has not been checked against the club noticeboard.
      Next step: Check the club noticeboard before telling others.
-   Then click "Close case".
+   Closing note (required for an Unresolved case): "Missing information:
+     whether the club noticeboard confirms Room B12. Next step: check the
+     noticeboard before telling others."  Source: Investigator summary
+   Then "Close case".
 
-2. Reopen: click "Reopen case" (the history logs "Case reopened").
+2. Reopen: "Reopen case" (history: "Case reopened ... Outcome kept: Unresolved").
 
-3. Follow-up evidence (add after reopening):
+3. Follow-up evidence (added after reopening):
    Note: "The club noticeboard still lists the original room for today. The
           club organiser has not yet confirmed a change."
    Source: recreated follow-up card
 
-4. Why the conclusion might change:
+4. Why the conclusion changed:
    The verified source (the noticeboard) now contradicts the chat message,
    and no organiser confirmed the change. Spreading the message ("Please tell
-   the others") could send people to the wrong room. You might revise to
-   "Do not follow the request" (don't pass it on); or keep "Pause and verify"
-   if you think the organiser may still confirm. This is your call.
+   the others") could send people to the wrong room. Recorded revision:
+   Concern supported. (Keeping Unresolved would also be defensible if you
+   think the organiser may still confirm. This is your call.)
+   Reason: The noticeboard, the normal source for room changes, contradicts
+     the chat message and no organiser has confirmed the change.
+   Next step: Do not pass the room change on; ask the club organiser directly
+     and follow the noticeboard until they confirm.
+   Then "Close case" again.
 
-5. Record the revised decision ("Change decision"), with a new reason and next
-   step (e.g. "Ask the organiser directly before telling anyone"), then click
-   "Close case" again.
-
-6. What to check afterwards (the history card on the case, or the export):
-   - "Decision recorded" with the first outcome and reason
+5. What the history shows (in time order):
+   - "Decision recorded - Outcome: Unresolved (unchanged); Reason: (empty) -> ..."
    - "Case closed", then "Case reopened"
-   - the second "Evidence note added" (source: recreated follow-up card)
-   - "Decision changed: <first> -> <revised>", then "Case closed"
-   This exact sequence was verified by the automated test (test 7) on a
-   throwaway test copy; please confirm it on your own desk after you do it.
+   - the follow-up "Evidence note added" (source: recreated follow-up card)
+   - "Decision changed - Outcome: Unresolved -> Concern supported; Reason:
+     old -> new; Next step: old -> new", then "Case closed"

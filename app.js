@@ -51,20 +51,25 @@
   ];
 
   // The three outcomes the investigator can record (from the project brief).
+  // The three outcomes from the assignment. Every case starts as Unresolved.
   const DECISIONS = {
-    no_warning: {
-      label: "No warning needed",
-      meaning: "Nothing in the supplied evidence justifies a warning. This does not prove the message is safe.",
+    concern: {
+      label: "Concern supported",
+      meaning: "The evidence supports a security concern.",
     },
-    pause_verify: {
-      label: "Pause and verify",
-      meaning: "The request could be genuine, but check it through a trusted route before doing anything.",
+    benign: {
+      label: "Benign explanation supported",
+      meaning: "The evidence supports a harmless explanation.",
     },
-    do_not_follow: {
-      label: "Do not follow the request",
-      meaning: "Doing what the message asks would itself put someone at real risk, whoever sent it.",
+    unresolved: {
+      label: "Unresolved",
+      meaning: "The supplied facts don't settle it yet; keep the uncertainty visible.",
     },
   };
+  // Names used by cases saved before the outcomes were renamed (still shown correctly)
+  const LEGACY_DECISIONS = { no_warning: "No warning needed", pause_verify: "Pause and verify", do_not_follow: "Do not follow the request" };
+  const UNRESOLVED = { value: "unresolved", reason: "", nextStep: "" };
+  const outcomeOf = (c) => c.decision || UNRESOLVED;
   const STATUS = { new: "New", investigating: "Investigating", closed: "Closed" };
 
   const $ = (selector) => document.querySelector(selector);
@@ -126,7 +131,7 @@
   const idKey = (id) => id.toUpperCase();
   const messageKey = (text) => text.toLowerCase().replace(/\s+/g, " ").trim();
   const preview = (text, max = 90) => (text.length > max ? `${text.slice(0, max)}…` : text);
-  const decisionLabel = (value) => DECISIONS[value]?.label || value;
+  const decisionLabel = (value) => DECISIONS[value]?.label || LEGACY_DECISIONS[value] || value;
 
   /* ---------------------------------------------------------------------
      2. IMPORT + VALIDATION
@@ -216,9 +221,9 @@
       possibleDuplicateOf: possibleDuplicateOf || null,
       status: "new",
       notes: [],
-      decision: null,
+      decision: { ...UNRESOLVED, at: time },
       closedAt: null,
-      history: [{ at: time, actor: "System", action: "Imported", detail: `From ${source}` }],
+      history: [{ at: time, actor: "System", action: "Case created", detail: `Imported from ${source}. Status: New. Outcome: Unresolved.` }],
     };
   }
 
@@ -442,26 +447,48 @@
 
   function recordDecision(c, value, reason, nextStep) {
     if (c.status === "closed") return toast("This case is closed. Reopen it to change the decision.", "error");
+    const previous = outcomeOf(c);
+    const show = (v) => (v ? `"${v}"` : "(empty)");
+    const changes = [
+      previous.value !== value && `Outcome: ${decisionLabel(previous.value)} → ${decisionLabel(value)}`,
+      previous.reason !== reason && `Reason: ${show(previous.reason)} → ${show(reason)}`,
+      previous.nextStep !== nextStep && `Next step: ${show(previous.nextStep)} → ${show(nextStep)}`,
+    ].filter(Boolean);
+    if (!changes.length) return toast("Nothing changed: the outcome, reason and next step are the same as before.", "info");
+    if (previous.value === value) changes.unshift(`Outcome: ${decisionLabel(value)} (unchanged)`);
     startInvestigating(c);
-    const previous = c.decision;
     c.decision = { value, reason, nextStep, at: now() };
-    const detail = `${decisionLabel(value)}. Reason: ${reason} Next step: ${nextStep}`;
-    logHistory(c, previous ? "Decision changed" : "Decision recorded", previous ? `${decisionLabel(previous.value)} → ${detail}` : detail);
+    logHistory(c, previous.reason ? "Decision changed" : "Decision recorded", changes.join("; "));
     commit(c, "Decision recorded.");
   }
 
+  // What is still needed before this case may be closed (empty list = ready).
+  function closureProblems(c) {
+    const d = outcomeOf(c);
+    const missing = [];
+    if (!d.reason) missing.push("a reason (in the Decision card)");
+    if (!d.nextStep) missing.push("a safe next step (in the Decision card)");
+    if (!c.notes.length) missing.push("at least one evidence note");
+    else if (d.value === "unresolved" && !c.notes.some((n) => n.at >= (d.at || ""))) {
+      missing.push("an evidence note, added after choosing Unresolved, that explains what information is missing and the next step");
+    }
+    return missing;
+  }
+
   function closeCase(c) {
-    if (!c.decision) return toast("Record a decision before closing the case.", "error");
+    const missing = closureProblems(c);
+    if (missing.length) return toast(`This case can't be closed yet. Add ${missing.join(", ")}.`, "error");
+    const from = STATUS[c.status];
     c.status = "closed";
     c.closedAt = now();
-    logHistory(c, "Case closed", `Outcome: ${decisionLabel(c.decision.value)}`);
+    logHistory(c, "Case closed", `Status: ${from} → Closed. Outcome: ${decisionLabel(outcomeOf(c).value)}`);
     commit(c, `${c.id} closed.`);
   }
 
   function reopenCase(c) {
     c.status = "investigating";
     c.closedAt = null;
-    logHistory(c, "Case reopened", "Status: Closed → Investigating");
+    logHistory(c, "Case reopened", `Status: Closed → Investigating. Outcome kept: ${decisionLabel(outcomeOf(c).value)}`);
     commit(c, `${c.id} reopened.`);
   }
 
@@ -510,7 +537,7 @@
             h("span", { class: "case-card-top" }, h("span", { class: "case-id", text: c.id }), statusBadge(c.status)),
             h("span", { class: "case-card-title", text: c.original.title || preview(c.original.message, 60) }),
             // "channel" is optional in the official format, so the line only appears when there is something to show
-            c.original.channel || c.decision ? h("span", { class: "case-card-meta" }, h("span", { text: c.original.channel || "" }), decisionBadge(c.decision)) : null
+            h("span", { class: "case-card-meta" }, h("span", { text: c.original.channel || "" }), decisionBadge(outcomeOf(c)))
           )
         )
       );
@@ -545,8 +572,7 @@
           type: "button",
           class: "btn primary",
           text: "Close case",
-          disabled: !c.decision,
-          title: c.decision ? "Close this case with the recorded decision" : "Record a decision before closing",
+          title: "Close this case with the recorded decision",
           onclick: () => closeCase(c),
         })
       );
@@ -561,11 +587,11 @@
         { class: "case-title-row" },
         h("span", { class: "case-id big", text: c.id }),
         statusBadge(c.status),
-        decisionBadge(c.decision)
+        decisionBadge(outcomeOf(c))
       ),
       h("h2", { class: "case-title", text: c.original.title || "Untitled report" }),
       actions,
-      !c.decision && c.status !== "closed" ? h("p", { class: "muted small", text: "Record a decision below before closing this case." }) : null,
+      c.status !== "closed" && closureProblems(c).length ? h("p", { class: "muted small", text: `To close this case, add ${closureProblems(c).join(", ")}.` }) : null,
       c.status === "closed" ? h("p", { class: "muted small", text: `Closed ${formatTime(c.closedAt)}. Reopen the case to add notes or change the decision.` }) : null
     );
   }
@@ -595,7 +621,7 @@
   }
 
   function notesCard(c) {
-    const draft = (drafts[c.id] ||= { note: "", reason: "", decision: c.decision?.value || "" });
+    const draft = (drafts[c.id] ||= { note: "", reason: "", decision: outcomeOf(c).value });
     const list = c.notes.length
       ? h("ol", { class: "notes" }, c.notes.map((n) => h("li", null, h("time", { text: formatTime(n.at) }), h("p", { text: n.text }), n.source ? h("span", { class: "note-source", text: `Source: ${n.source}` }) : null)))
       : h("p", { class: "muted", text: "No evidence notes yet. Record what you checked and what you found." });
@@ -633,16 +659,15 @@
 
   function decisionCard(c) {
     const draft = drafts[c.id];
-    const current = c.decision
-      ? h(
-          "div",
-          { class: `current-decision decision-${c.decision.value}` },
-          h("strong", { text: decisionLabel(c.decision.value) }),
-          h("p", { text: c.decision.reason }),
-          c.decision.nextStep ? h("p", null, h("strong", { text: "Next step: " }), c.decision.nextStep) : null,
-          h("span", { class: "muted small", text: `Recorded by you · ${formatTime(c.decision.at)}` })
-        )
-      : h("p", { class: "muted", text: "No decision recorded yet." });
+    const d = outcomeOf(c);
+    const current = h(
+      "div",
+      { class: `current-decision decision-${d.value}` },
+      h("strong", { text: decisionLabel(d.value) }),
+      d.reason ? h("p", { text: d.reason }) : h("p", { class: "muted", text: "No reason recorded yet (every case starts as Unresolved)." }),
+      d.nextStep ? h("p", null, h("strong", { text: "Next step: " }), d.nextStep) : null,
+      d.reason ? h("span", { class: "muted small", text: `Recorded by you · ${formatTime(d.at)}` }) : null
+    );
 
     if (c.status === "closed") return card("i-scale", "Decision", "Your call", current);
 
@@ -678,13 +703,13 @@
       h("fieldset", { class: "decision-options" }, h("legend", { class: "visually-hidden", text: "Decision" }), options),
       reason,
       nextStep,
-      h("div", { class: "row" }, h("button", { type: "submit", class: "btn primary", text: c.decision ? "Change decision" : "Record decision" }), h("span", { class: "muted small", text: "Earlier decisions stay in the history." }))
+      h("div", { class: "row" }, h("button", { type: "submit", class: "btn primary", text: outcomeOf(c).reason ? "Change decision" : "Record decision" }), h("span", { class: "muted small", text: "Earlier decisions stay in the history." }))
     );
     return card("i-scale", "Decision", "Your call — the AI can't set this", current, form);
   }
 
   function historyCard(c) {
-    const items = [...c.history].reverse().map((entry) =>
+    const items = c.history.map((entry) =>
       h(
         "li",
         { class: `actor-${entry.actor === "You" ? "you" : "system"}` },
@@ -693,7 +718,7 @@
         h("span", { class: "actor", text: entry.actor })
       )
     );
-    return card("i-clock", "Investigation history", "Automatic log · newest first", h("ol", { class: "history" }, items));
+    return card("i-clock", "Investigation history", "Automatic log · in time order", h("ol", { class: "history" }, items));
   }
 
   function renderCase() {
@@ -738,9 +763,9 @@
       `${c.id} · ${o.title || "Untitled report"}`,
       "=".repeat(64),
       `Status:   ${STATUS[c.status]}${c.closedAt ? ` (closed ${formatTime(c.closedAt)})` : ""}`,
-      `Decision: ${c.decision ? `${decisionLabel(c.decision.value)} (recorded by the investigator ${formatTime(c.decision.at)})` : "None recorded"}`,
-      c.decision ? `Reason:   ${c.decision.reason}` : null,
-      c.decision ? `Next step: ${c.decision.nextStep || "Not recorded"}` : null,
+      `Outcome:  ${decisionLabel(outcomeOf(c).value)}${outcomeOf(c).reason ? ` (recorded by the investigator ${formatTime(outcomeOf(c).at)})` : " (starting value)"}`,
+      `Reason:   ${outcomeOf(c).reason || "Not recorded yet"}`,
+      `Next step: ${outcomeOf(c).nextStep || "Not recorded yet"}`,
       "",
       "ORIGINAL REPORT (unchanged since import)",
       LINE,

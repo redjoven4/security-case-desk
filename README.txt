@@ -21,11 +21,18 @@ MAIN FEATURES
 - Case statuses: New, Investigating, Closed (with inbox filters and search).
 - Evidence notes with a timestamp and a required source. Notes cannot be
   edited or deleted; add a new note to correct one.
-- Human decisions: No warning needed / Pause and verify / Do not follow the
-  request, each with a required reason and a safe next step.
-- Closing (only after a decision) and reopening cases.
-- Permanent investigation history: every import, status change, note,
-  decision, change of decision, closing and reopening is logged with the time.
+- Human decisions with three outcomes: Concern supported / Benign explanation
+  supported / Unresolved. Every case starts as Unresolved. Each decision needs
+  a reason and a safe next step.
+- Closing needs a reason, a next step and at least one evidence note. An
+  Unresolved case can be closed only after a note (added after choosing
+  Unresolved) explains what information is missing and the next step. If
+  something is missing, the app says what to add. Reopening returns the case
+  to Investigating and keeps the earlier decision.
+- Permanent investigation history, shown in time order: record creation,
+  status changes, notes, decisions and changes of decision (with the previous
+  and new outcome, reason and next step), closing and reopening, each with the
+  time. Nothing in the history can be edited or deleted.
 - Persistent local storage in the browser.
 - Readable text export of one case or all cases.
 - Optional local AI analysis and follow-up chat (advisory only).
@@ -49,6 +56,9 @@ HOW TO START THE APPLICATION
 AI assistant and the "Load sample cases" button works that way.)
 
 HOW TO IMPORT JSON REPORTS
+To load the assignment's sample cases: click "Import JSON" and choose
+starter_cases.json (in this folder or in starter_files/). "Load sample cases"
+loads the app's own demonstration cases instead.
 Click "Import JSON" and choose a .json file, or drop the file onto the page.
 "Format guide" (next to the button) shows the required fields and downloads
 an example. Example of one report:
@@ -75,7 +85,7 @@ HOW TO EXPORT REPORTS
 - "Export case (.txt)" on a case downloads that case.
 - "Export all (.txt)" in the top bar downloads every case.
 Each export includes the export time, the original report, the current status,
-the decision with its reason and next step, the evidence notes with sources,
+the outcome with its reason and next step, the evidence notes with sources,
 and the full investigation history. AI advice is included only if you saved
 it, in a separate section labelled "AI-GENERATED ADVICE — NOT INDEPENDENTLY
 VERIFIED".

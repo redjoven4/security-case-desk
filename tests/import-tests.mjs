@@ -174,7 +174,7 @@ try {
   await openCase("CASE-001");
   await page(`const note = document.querySelector('textarea[aria-label="New evidence note"]'); note.value = "Asked my clan leader: no giveaway was announced."; note.dispatchEvent(new Event("input")); const src = document.querySelector('input[aria-label="Evidence source"]'); src.value = "Clan leader, asked in person"; src.dispatchEvent(new Event("input")); note.closest("form").requestSubmit();
     await new Promise(r => setTimeout(r, 150));
-    document.querySelector('input[name="decision-CASE-001"][value="do_not_follow"]').click();
+    document.querySelector('input[name="decision-CASE-001"][value="concern"]').click();
     const reason = document.querySelector('textarea[aria-label="Reason for the decision"]'); reason.value = "Asks to log in through a link for a reward."; reason.dispatchEvent(new Event("input")); const step = document.querySelector('textarea[aria-label="Next step"]'); step.value = "Don't click the link; report the player in the game."; step.dispatchEvent(new Event("input")); reason.closest("form").requestSubmit();
     await new Promise(r => setTimeout(r, 150)); return true`);
   const baseline001 = JSON.stringify(await findCase("CASE-001"));
