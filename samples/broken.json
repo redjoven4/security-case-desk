@@ -1,0 +1,7 @@
+{
+  "reports": [
+    {
+      "id": "CASE-099",
+      "message": "This file is deliberately broken to test the import error message."
+    },
+  ]

@@ -1,0 +1,8 @@
+[
+  {
+    "report_id": "CASE-TEST-101",
+    "title": "Suspicious chess tournament verification",
+    "message": "Your tournament registration will be cancelled unless you provide your sign-in code.",
+    "context": "The student registered for a tournament but has not confirmed whether this request came from the organisers."
+  }
+]

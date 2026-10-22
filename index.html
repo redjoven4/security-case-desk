@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Security Case Desk</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2328745C'/%3E%3Cpath d='M16 6.5l7.5 3v5.3c0 5-3.3 8.8-7.5 10.4-4.2-1.6-7.5-5.4-7.5-10.4V9.5z' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12.6 15.6l2.4 2.4 4.4-4.6' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ICONS + the robot mascot (drawn here; no image files, works offline).
+     Flat and quiet to suit the light theme: warm grey shell, charcoal visor,
+     soft green eyes, no glow. -->
+<svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="botShell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ECEAE5"/>
+    </linearGradient>
+    <linearGradient id="botVisor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3A3A38"/><stop offset="1" stop-color="#242424"/>
+    </linearGradient>
+  </defs>
+  <symbol id="bot" viewBox="0 0 48 48">
+    <line class="bot-antenna" x1="24" y1="5" x2="24" y2="9.5" stroke="#C9C5BE" stroke-width="2" stroke-linecap="round"/>
+    <circle class="bot-antenna-tip" cx="24" cy="3.8" r="2.4" fill="#28745C"/>
+    <ellipse cx="6.6" cy="26.5" rx="3" ry="5.2" fill="#DCD9D3"/>
+    <ellipse cx="41.4" cy="26.5" rx="3" ry="5.2" fill="#DCD9D3"/>
+    <path d="M24 8.5C35.6 8.5 42 15.8 42 26.2C42 36.6 35.2 42.5 24 42.5C12.8 42.5 6 36.6 6 26.2C6 15.8 12.4 8.5 24 8.5Z" fill="url(#botShell)" stroke="#D7D4CE" stroke-width="1"/>
+    <path d="M24 15.2C32.8 15.2 37.2 19.6 37.2 26.4C37.2 32.9 32.6 36.4 24 36.4C15.4 36.4 10.8 32.9 10.8 26.4C10.8 19.6 15.2 15.2 24 15.2Z" fill="url(#botVisor)"/>
+    <path d="M15.4 19.6Q24 15.9 32.6 19.6" fill="none" stroke="#ffffff" stroke-opacity="0.16" stroke-width="1.1" stroke-linecap="round"/>
+    <g class="bot-eyes">
+      <ellipse cx="18.6" cy="25.4" rx="2.6" ry="3.2" fill="#9ED3BF"/>
+      <ellipse cx="29.4" cy="25.4" rx="2.6" ry="3.2" fill="#9ED3BF"/>
+      <circle cx="19.5" cy="24.1" r="0.8" fill="#ffffff"/>
+      <circle cx="30.3" cy="24.1" r="0.8" fill="#ffffff"/>
+    </g>
+    <path class="bot-mouth" d="M21.2 31.2Q24 33.2 26.8 31.2" fill="none" stroke="#9ED3BF" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.6c0 4.6-3.1 8.1-7.5 9.4-4.4-1.3-7.5-4.8-7.5-9.4V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4m0 0l-4 4m4-4l4 4M5 15v3a2 2 0 002 2h10a2 2 0 002-2v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 15v3a2 2 0 002 2h10a2 2 0 002-2v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 11h7M9 15h7M9 7h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M7 20h10M5 7h14M5 7l-2.5 6a3 3 0 005 0zM19 7l-2.5 6a3 3 0 005 0z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.2v.3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-question" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.6 9.5a2.5 2.5 0 114 2c-.9.6-1.6 1.1-1.6 2.3M12 16.8v.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14zm0 0l7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 8.5l-2 5-5 2 2-5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sum" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 12.5h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-7-6 15-2.5-6.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.5L7 20z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 8a7.5 7.5 0 10.9 6M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#i-shield"/></svg></span>
+    <div>
+      <h1>Security Case Desk</h1>
+      <p>Security Intelligence &amp; Investigation Platform</p>
+    </div>
+  </div>
+
+  <div class="ai-status" id="ai-status-global" data-state="checking" role="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span><span class="text">Checking local AI…</span>
+  </div>
+
+  <div class="top-actions">
+    <label class="btn primary" for="import-input"><svg class="icon"><use href="#i-upload"/></svg> Import JSON</label>
+    <input type="file" id="import-input" accept=".json,application/json" class="visually-hidden">
+    <button type="button" class="btn subtle" id="format-guide-open" aria-haspopup="dialog"><svg class="icon"><use href="#i-question"/></svg> Format guide</button>
+    <button type="button" class="btn" id="load-samples">Load sample cases</button>
+    <button type="button" class="btn" id="export-all"><svg class="icon"><use href="#i-download"/></svg> Export all (.txt)</button>
+  </div>
+</header>
+
+<div id="notice" class="notice" aria-live="polite"></div>
+
+<main class="layout">
+  <!-- CASE INBOX -->
+  <aside class="inbox" aria-labelledby="inbox-title">
+    <div class="inbox-head">
+      <h2 id="inbox-title">Case inbox</h2>
+      <span class="count" id="inbox-total">0</span>
+    </div>
+    <div class="filters" role="group" aria-label="Filter cases by status">
+      <button type="button" class="filter" data-filter="all" aria-pressed="true">All <span>0</span></button>
+      <button type="button" class="filter" data-filter="new" aria-pressed="false">New <span>0</span></button>
+      <button type="button" class="filter" data-filter="investigating" aria-pressed="false">Investigating <span>0</span></button>
+      <button type="button" class="filter" data-filter="closed" aria-pressed="false">Closed <span>0</span></button>
+    </div>
+    <label class="search">
+      <svg class="icon"><use href="#i-search"/></svg>
+      <span class="visually-hidden">Search cases</span>
+      <input type="search" id="case-search" placeholder="Search cases" title="Searches the ID, title, sender, channel, background, message and any extra fields" autocomplete="off">
+    </label>
+    <ul class="case-list" id="case-list"></ul>
+    <p class="inbox-empty" id="inbox-empty">No cases yet. Import a JSON report, or load the sample cases.</p>
+    <p class="drop-hint">Tip: you can also drop a .json file anywhere on the page.</p>
+    <footer class="footer">
+      <span>Runs entirely on this Mac. Cases are saved in this browser (localStorage) at this address. No cloud AI, no tracking.</span>
+      <button type="button" class="link-btn" id="reset-desk">Reset desk (delete all cases)</button>
+    </footer>
+  </aside>
+
+  <section class="workspace">
+    <div id="import-summary" class="import-summary" hidden></div>
+
+    <!-- Nothing selected -->
+    <div id="welcome" class="welcome">
+      <svg class="welcome-bot" aria-hidden="true"><use href="#bot"/></svg>
+      <h2>Pick a case to investigate</h2>
+      <p>Choose a case from the inbox, or import a JSON report. You record the evidence and the decision. The AI analyst is optional and can only give advice.</p>
+    </div>
+
+    <!-- Selected case: official record (left) + AI companion (right) -->
+    <div id="case-view" class="case-view" hidden>
+      <article id="case-record" class="case-record" aria-label="Official investigation record"></article>
+
+      <aside id="ai-panel" class="ai-panel" aria-labelledby="ai-title">
+        <div class="ai-head">
+          <div class="ai-mascot" id="ai-mascot" aria-hidden="true"><svg><use href="#bot"/></svg></div>
+          <div class="ai-head-text">
+            <h2 id="ai-title">AI Security Analyst</h2>
+            <p>Advisory only · runs on this Mac · cannot change the case</p>
+          </div>
+        </div>
+
+        <div class="ai-status-row">
+          <div class="ai-status" id="ai-status-panel" data-state="checking" role="status" aria-live="polite">
+            <span class="dot" aria-hidden="true"></span><span class="text">Checking local AI…</span>
+          </div>
+          <button type="button" class="btn small" id="ai-check"><svg class="icon"><use href="#i-refresh"/></svg> Check Connection</button>
+        </div>
+        <p class="ai-help" id="ai-help" hidden></p>
+
+        <section class="ai-block" aria-labelledby="ai-analysis-title">
+          <div class="ai-block-head">
+            <h3 id="ai-analysis-title">Security analysis <span class="case-tag" id="ai-case-tag"></span></h3>
+          </div>
+          <div class="ai-actions">
+            <button type="button" class="btn primary" id="ai-analyse"><svg class="icon"><use href="#i-sparkle"/></svg> Analyse Case</button>
+            <button type="button" class="btn danger-ghost" id="ai-cancel" hidden><svg class="icon"><use href="#i-stop"/></svg> Cancel</button>
+            <span class="ai-progress" id="ai-progress" aria-live="polite"></span>
+          </div>
+          <div class="ai-error" id="ai-error" role="alert" hidden></div>
+          <div class="ai-analysis" id="ai-analysis"></div>
+        </section>
+
+        <section class="ai-block ai-chat" aria-labelledby="ai-chat-title">
+          <div class="ai-block-head">
+            <h3 id="ai-chat-title">Follow-up questions</h3>
+            <button type="button" class="link-btn" id="ai-clear-chat">Clear AI conversation</button>
+          </div>
+          <p class="ai-chat-note">Your AI conversation for this case only. It is not part of the official investigation record.</p>
+          <div class="chat-log" id="ai-chat-log" aria-live="polite"></div>
+          <div class="suggestions" id="ai-suggestions"></div>
+          <form class="chat-form" id="ai-chat-form">
+            <label for="ai-chat-input" class="visually-hidden">Ask the AI about this case</label>
+            <textarea id="ai-chat-input" rows="2" maxlength="2000" placeholder="Ask about this case… (Enter to send, Shift+Enter for a new line)"></textarea>
+            <button type="submit" class="btn primary icon-only" id="ai-chat-send" aria-label="Send question"><svg class="icon"><use href="#i-send"/></svg></button>
+          </form>
+        </section>
+
+        <section class="ai-block ai-saved" aria-labelledby="ai-saved-title">
+          <div class="ai-block-head">
+            <h3 id="ai-saved-title">Saved AI advice <span class="count" id="ai-saved-count">0</span></h3>
+          </div>
+          <p class="ai-chat-note">Suggestions you chose to keep with this case. Kept apart from your evidence notes and decision.</p>
+          <ul class="saved-list" id="ai-saved-list"></ul>
+        </section>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<!-- JSON FORMAT GUIDE (opened by the "Format guide" button) -->
+<dialog id="format-guide" class="guide" aria-labelledby="guide-title">
+  <div class="guide-head">
+    <h2 id="guide-title">JSON format guide</h2>
+    <button type="button" class="link-btn" data-close>Close</button>
+  </div>
+  <p>The official format is a JSON <strong>array</strong> of reports, <code>[ { … }, { … } ]</code>, with one or more reports. Every report needs these four fields, each a non-empty piece of text:</p>
+  <table class="guide-table">
+    <thead><tr><th scope="col">Field</th><th scope="col">Required</th><th scope="col">What it holds</th></tr></thead>
+    <tbody>
+      <tr><td><code>report_id</code></td><td>Yes</td><td>The report's unique ID, for example CASE-TEST-101 (max 80 characters)</td></tr>
+      <tr><td><code>title</code></td><td>Yes</td><td>Short summary shown in the inbox (max 200)</td></tr>
+      <tr><td><code>message</code></td><td>Yes</td><td>The message being investigated (max 5,000)</td></tr>
+      <tr><td><code>context</code></td><td>Yes</td><td>What is known about the situation (max 2,000)</td></tr>
+    </tbody>
+  </table>
+  <p class="muted small">Optional, and shown on the case when present: <code>channel</code>, <code>sender</code> (the name as displayed; it doesn't prove who sent it), <code>reportedBy</code> and <code>receivedAt</code> (a date such as 2026-10-22T18:30:00+08:00). Any other fields are kept as <em>additional fields</em> and never cause a rejection. Older files that use <code>id</code> instead of <code>report_id</code>, or <code>background</code> instead of <code>context</code>, are still accepted. A single report on its own, or <code>{ "reports": [ … ] }</code>, also works.</p>
+  <p class="muted small">The whole file is checked first: if any report is missing a required field, or has one that is empty, <strong>nothing</strong> is imported and your existing cases stay as they are. A report whose ID is already on the desk (or appears twice in the file) is skipped, never overwritten. Limits: 5 MB and 2,000 reports per file. Use placeholders such as <code>[link omitted]</code> instead of real links, codes or personal details.</p>
+  <h3>Example with one report</h3>
+  <pre class="guide-example" id="guide-example"></pre>
+  <div class="row">
+    <button type="button" class="btn primary" id="guide-download"><svg class="icon"><use href="#i-download"/></svg> Download example (.json)</button>
+    <button type="button" class="btn" data-close>Close</button>
+  </div>
+</dialog>
+
+
+<script src="dom.js"></script>
+<script src="app.js"></script>
+<script src="ai.js"></script>
+</body>
+</html>

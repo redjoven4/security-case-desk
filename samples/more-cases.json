@@ -1,0 +1,29 @@
+[
+  {
+    "report_id": "CASE-007",
+    "title": "Coach asks to move practice",
+    "message": "URGENT: practice tonight moves to the back field because the main pitch is being watered. Same time, 5pm.",
+    "context": "Coach Daniels runs this group chat and posts practice times every week.",
+    "channel": "Football team group chat",
+    "sender": "Coach Daniels",
+    "priority": "high"
+  },
+  {
+    "report_id": "CASE-008",
+    "title": "Same giveaway, different ID",
+    "message": "CONGRATS!!!   You were picked for 5,000 free gems. Log in at [link omitted] within 1 hour to claim them or they go to the next player.",
+    "context": "Same message text as CASE-001, reported by a different student."
+  },
+  {
+    "report_id": "CASE-009",
+    "title": "Report with no message",
+    "context": "Missing the required \"message\" field."
+  },
+  {
+    "report_id": "CASE 010",
+    "title": "   ",
+    "message": "This report's title is only spaces, which counts as empty.",
+    "context": "Required fields must not be empty or whitespace-only.",
+    "receivedAt": "next Tuesday-ish"
+  }
+]

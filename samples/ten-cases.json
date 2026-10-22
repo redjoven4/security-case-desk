@@ -1,0 +1,107 @@
+{
+  "reports": [
+    {
+      "report_id": "CASE-101",
+      "title": "Mailbox almost full",
+      "message": "Your mailbox storage is 98% full. Sign in at [link omitted] within 48 hours to keep receiving email, or new messages will be deleted.",
+      "context": "Our school IT team usually emails from the school's own address. This one came from a different address.",
+      "channel": "School email",
+      "sender": "IT Helpdesk",
+      "reportedBy": "Student (fictional)",
+      "receivedAt": "2026-10-20T07:45:00+08:00",
+      "subject": "ACTION REQUIRED: Mailbox quota exceeded",
+      "senderAddress": "helpdesk@[domain omitted]"
+    },
+    {
+      "report_id": "CASE-102",
+      "title": "Skin trade that needs your login",
+      "message": "I'll give you 10,000 coins for your Dragon Blade skin. Just log in at [link omitted] so the trade site can verify both accounts. Quick before I change my mind!",
+      "context": "I have a rare Dragon Blade skin. I have never traded with this player.",
+      "channel": "In-game chat (Blockfront)",
+      "sender": "xX_TradeKing_Xx",
+      "reportedBy": "Year 8 student (fictional)",
+      "receivedAt": "2026-10-20T16:10:00+08:00"
+    },
+    {
+      "report_id": "CASE-103",
+      "title": "\"Is this you in this video?\"",
+      "message": "omg is this you in this video?? [link omitted]",
+      "context": "Jamie and I haven't talked in months. Jamie never sends links without saying something first.",
+      "channel": "Discord direct message",
+      "sender": "Jamie (friend's account)",
+      "reportedBy": "Student (fictional)",
+      "receivedAt": "2026-10-20T21:02:00+08:00"
+    },
+    {
+      "report_id": "CASE-104",
+      "title": "Invitation to an esports cup",
+      "message": "You're invited to the Asia Junior Esports Cup! Register your team by entering your game login and password at [link omitted]. Registration closes tonight at midnight.",
+      "context": "Our team has never applied to this cup.",
+      "channel": "Email",
+      "sender": "Asia Junior Esports Cup",
+      "reportedBy": "Team captain (fictional)",
+      "receivedAt": "2026-10-21T09:00:00+08:00",
+      "prizePool": "$10,000"
+    },
+    {
+      "report_id": "CASE-105",
+      "title": "Caller asks for the code sent to my phone",
+      "message": "Hi, this is Mr Tan from the school office. I'm locked out of the parents' portal for your class. A code was just sent to your phone; can you read it out to me so I can get back in?",
+      "context": "A code arrived by text during the call. I don't know a Mr Tan in the office.",
+      "channel": "Phone call (written down by the reporter)",
+      "sender": "Caller said he was \"Mr Tan from the school office\"",
+      "reportedBy": "Student (fictional)",
+      "receivedAt": "2026-10-21T13:20:00+08:00"
+    },
+    {
+      "report_id": "CASE-106",
+      "title": "New sign-in alert asks for password",
+      "message": "Security alert: a new device in another country signed in to your account. If this wasn't you, reply to this email with your password so we can lock the account.",
+      "context": "I was asleep at that time and didn't sign in anywhere.",
+      "channel": "Email",
+      "sender": "Account Security",
+      "reportedBy": "Student (fictional)",
+      "receivedAt": "2026-10-21T23:40:00+08:00"
+    },
+    {
+      "report_id": "CASE-107",
+      "title": "Aunt asks for gift cards",
+      "message": "Hi it's your aunt, I lost my phone so I'm using a friend's. Can you buy two $50 gift cards and send me the codes? It's urgent, I'll pay you back tomorrow.",
+      "context": "My aunt lives overseas. I have her real number saved in my phone.",
+      "channel": "SMS from an unknown number",
+      "sender": "Unknown number",
+      "reportedBy": "Student (fictional)",
+      "receivedAt": "2026-10-22T10:05:00+08:00"
+    },
+    {
+      "report_id": "CASE-108",
+      "title": "Parcel waiting, track it here",
+      "message": "Your parcel is waiting for delivery. Confirm your address here: [link omitted]",
+      "context": "I am not expecting a parcel.",
+      "channel": "SMS",
+      "sender": "PostTrack",
+      "reportedBy": "Student (fictional)",
+      "receivedAt": "2026-10-22T11:30:00+08:00"
+    },
+    {
+      "report_id": "CASE-109",
+      "title": "\"Official support\" threatens a ban",
+      "message": "This is the official Galaxy Racers support team. You broke rule 4.2. Appeal within 2 hours at [link omitted] or your account will be permanently banned.",
+      "context": "I haven't broken any rules that I know of. The game's real support team uses a verified badge; this account has none.",
+      "channel": "In-game direct message (Galaxy Racers)",
+      "sender": "GalaxyRacers_Support_",
+      "reportedBy": "Student (fictional)",
+      "receivedAt": "2026-10-22T14:15:00+08:00"
+    },
+    {
+      "report_id": "CASE-110",
+      "title": "Science fair forms due Friday",
+      "message": "Reminder: science fair forms are due this Friday. Submit them through the usual class portal, the same way as last term. Ask me in class if you have questions.",
+      "context": "Mr Lee is our science teacher and usually posts reminders in this chat.",
+      "channel": "Class group chat",
+      "sender": "Mr Lee (science teacher)",
+      "reportedBy": "Student (fictional)",
+      "receivedAt": "2026-10-22T08:00:00+08:00"
+    }
+  ]
+}

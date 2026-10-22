@@ -1,0 +1,8 @@
+[
+  {
+    "id": "CASE-LEGACY-001",
+    "title": "Old-format report using id and background",
+    "message": "Hi, it's the club captain. I'm locked out of the team account. Can you send me the 6-digit code that was just texted to you?",
+    "background": "This file uses the older field names \"id\" and \"background\" instead of \"report_id\" and \"context\". The desk still accepts them."
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "report_id": "CASE-100",
+  "title": "Tournament prize needs a verification fee",
+  "message": "Congrats! Your team won 2nd place ($500). To release the prize, pay a $25 verification fee at [link omitted] within 24 hours.",
+  "context": "Our team entered an online qualifier last month. Nobody has told us we won anything.",
+  "channel": "Discord direct message",
+  "sender": "ProLeague_Admin",
+  "reportedBy": "Team captain (fictional)",
+  "receivedAt": "2026-10-22T18:30:00+08:00"
+}

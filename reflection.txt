@@ -1,0 +1,10 @@
+Reflection - Security Case Desk
+
+1. Real bug: importing a report in the assignment's format failed with "Report 1 - Missing 'id'".
+2. Cause: the importer had been built with its own field names ("id" and "background"), so the official "report_id" and "context" fields were treated as unknown extra fields.
+3. Fix: the importer now requires the official four fields (report_id, title, message, context). It still accepts "id"/"background" from older files, and it checks the whole file before importing anything.
+4. Verification: the failing example was reproduced first. Afterwards, automated browser tests imported it successfully and also covered duplicates, legacy files, missing fields, malformed JSON and refreshing (33 of 33 checks passed).
+5. A second gap: evidence notes had no source and decisions had no next step; both fields were added and are now required and exported.
+6. Remaining limitation: cases are stored in the browser's localStorage, so clearing browser data erases them unless they were exported first.
+7. AI assistance: an AI coding assistant (Claude Code) wrote and debugged most of the code and tests. I described requirements, reported bugs and reviewed results.
+8. A local AI model (Qwen3 8B via Ollama) is part of the app as an advisory analyst only; it cannot change any case record.

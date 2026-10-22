@@ -1,0 +1,23 @@
+[
+  {
+    "report_id": "CASE-101",
+    "title": "Different report that reuses an existing ID",
+    "message": "This report reuses the ID CASE-101. The desk must skip it and must not overwrite the existing CASE-101 investigation.",
+    "context": "Used to test duplicate detection: CASE-101 is already on the desk from ten-cases.json."
+  },
+  {
+    "report_id": "CASE-111",
+    "title": "Club treasurer asks to switch bank account",
+    "message": "Hi all, please send this term's club fee to our new bank account [account omitted] instead of the usual one. The old account is closed.",
+    "context": "Club fees have always been paid to the same school account.",
+    "channel": "Email",
+    "sender": "Chess Club Treasurer",
+    "reportedBy": "Club member (fictional)"
+  },
+  {
+    "report_id": "CASE-111",
+    "title": "The same ID twice in one file",
+    "message": "This second CASE-111 in the same file must also be skipped as a duplicate.",
+    "context": "Used to test duplicates within a single file."
+  }
+]

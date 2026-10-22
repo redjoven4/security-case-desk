@@ -1,0 +1,13 @@
+[
+  {
+    "report_id": "CASE-TEST-201",
+    "title": "A valid report in a file that also has a broken one",
+    "message": "Please confirm your attendance for Saturday's match by replying YES.",
+    "context": "This report is valid, but the next one in the same file is missing \"context\", so the whole file must be rejected and nothing imported."
+  },
+  {
+    "report_id": "CASE-TEST-202",
+    "title": "Report with a missing required field",
+    "message": "Your account will be closed today. Log in at [link omitted] to keep it."
+  }
+]

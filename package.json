@@ -1,0 +1,15 @@
+{
+  "name": "security-case-desk",
+  "version": "1.0.0",
+  "description": "Security Case Desk with an optional local AI Security Analyst (Ollama + qwen3:8b). No cloud AI, no API keys.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.mjs",
+    "test:ai": "node tests/ai-tests.mjs",
+    "test:import": "node tests/import-tests.mjs"
+  },
+  "engines": {
+    "node": ">=20.12"
+  }
+}
