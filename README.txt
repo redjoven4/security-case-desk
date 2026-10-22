@@ -38,9 +38,10 @@ REQUIRED SOFTWARE
 
 HOW TO START THE APPLICATION
 1. Optional: open the Ollama app (llama icon in the menu bar).
-2. Open Terminal and run:
+2. Open Terminal, go to the folder that contains package.json, and start it:
      cd "/path/to/security-case-desk"
      npm start
+   (In the submission folder, that folder is "app":  cd "<submission folder>/app")
 3. Open http://localhost:8090 in your browser. Always use this exact
    address: saved cases belong to the address they were created at.
 4. To stop: press Control + C in the Terminal window.
@@ -112,5 +113,7 @@ FILES
 index.html, style.css, dom.js, app.js, ai.js  - the application
 server/server.mjs, server/ollama.mjs          - local server and AI connection
 samples/                                      - demonstration and test files
-tests/                                        - automated tests
+tests/                                        - automated tests:
+    npm run test:assignment  (uses the supplied starter files; needs Chrome)
+    npm run test:import      npm run test:ai
 README.md, TESTING.md                         - detailed documentation

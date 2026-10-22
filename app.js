@@ -348,7 +348,8 @@
 
   function importHeadline(result) {
     if (result.rejected) {
-      return `Import rejected: ${plural(result.invalid.length, "report")} ${result.invalid.length === 1 ? "has" : "have"} a problem, so none of the ${plural(result.rejected.total, "report")} in this file ${result.rejected.total === 1 ? "was" : "were"} imported. Your existing cases are unchanged.`;
+      const notImported = result.rejected.total === 1 ? "the report in this file was not imported" : `none of the ${result.rejected.total} reports in this file were imported`;
+      return `Import rejected: ${plural(result.invalid.length, "report")} ${result.invalid.length === 1 ? "has" : "have"} a problem, so ${notImported}. Your existing cases are unchanged.`;
     }
     return `Import completed: ${plural(result.imported.length, "case")} added, ${plural(result.duplicates.length, "duplicate")} skipped, ${plural(result.invalid.length, "invalid case")} rejected.`;
   }

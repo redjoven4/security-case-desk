@@ -1,0 +1,149 @@
+SECURITY CASE DESK - TEST RESULTS
+=================================
+Date: 22 Oct 2026
+Run by: automated browser test tests/assignment-tests.mjs (npm run test:assignment),
+        in headless Google Chrome with a throwaway profile, on a separate test copy
+        of the desk (port 8096), using the supplied files exactly as provided:
+        starter_cases.json, duplicate_cases.json, malformed_cases.json,
+        follow_up_cards.txt.
+Raw report: test-results/assignment-test-2026-10-22T14-32-01.md (23 of 23 checks passed)
+The decisions made during testing are test data only. They were not recorded on the
+real desk.
+
+NOTE ON TEST CATEGORIES: the assignment PDF was not available when these tests
+were run (it did not reach this computer). The categories below follow the
+nine required features listed in the submission instructions and the four
+supplied files. Please compare them with the PDF's "eight testing categories"
+and add any category the PDF names that is missing here.
+
+NOTE ON follow_up_cards.txt: the file states that it is "RECREATED FICTIONAL TEST
+DATA ... NOT the original internship starter file". Its notes were entered with
+the source "recreated follow-up card", as it instructs.
+
+-----------------------------------------------------------------------
+TEST 1 - JSON import of starter_cases.json
+Expected: all 6 reports (report_id, title, message, context) imported; each starts as New.
+Actual:   "Import completed: 6 cases added, 0 duplicates skipped, 0 invalid cases
+          rejected." Statuses: new, new, new, new, new, new.
+Result:   PASS
+Fixes made: Earlier, the importer required "id" instead of "report_id" and rejected
+          official-format reports ("Report 1 - Missing 'id'"). It was fixed to require
+          report_id, title, message and context (see reflection.txt).
+
+-----------------------------------------------------------------------
+TEST 2 - Duplicate detection (duplicate_cases.json)
+Expected: CASE-001 appears twice in the file. On an empty desk, the first is added
+          and the second skipped. After starter_cases.json, both are skipped and the
+          existing CASE-001 is not overwritten.
+Actual:   Empty desk: "1 case added, 1 duplicate skipped, 0 invalid cases rejected."
+          After the starter file: "0 cases added, 2 duplicates skipped, 0 invalid cases
+          rejected." The saved record was byte-for-byte unchanged.
+Result:   PASS
+Fixes made: none needed.
+
+-----------------------------------------------------------------------
+TEST 3 - Validation of malformed_cases.json (missing "context")
+Expected: the file is rejected with a clear reason; existing cases are unchanged.
+Actual:   "Import rejected: 1 report has a problem, so the report in this file was
+          not imported. Your existing cases are unchanged." The reason shown was
+          'Missing "context"'. The saved record was unchanged.
+          Extra check: a syntactically broken JSON file (samples/broken.json) was
+          rejected with the line and column of the error, and nothing changed.
+Result:   PASS
+Fixes made: the message wording for a one-report file was corrected (it read
+          "none of the 1 report ... was imported").
+
+-----------------------------------------------------------------------
+TEST 4 - Case statuses (New, Investigating, Closed)
+Expected: new cases are New; adding evidence makes them Investigating; closing makes
+          them Closed; reopening makes them Investigating again.
+Actual:   All six starter cases were New. CASE-002 became Investigating after its
+          first note. CASE-001 was Closed, then Investigating after reopening, then
+          Closed again.
+Result:   PASS
+Fixes made: none needed.
+
+-----------------------------------------------------------------------
+TEST 5 - Evidence notes with timestamps and sources
+Expected: a note is saved with its text, time and source; a note without a source is
+          refused.
+Actual:   The CASE-002 note was saved with source "Original report
+          (starter_cases.json)" and a valid timestamp. A note with an empty source
+          was refused (the note count stayed at 1).
+Result:   PASS
+Fixes made: evidence notes previously had a timestamp but no source. A required
+          "Source" field was added; it is shown on the case, logged in the history
+          and included in the export.
+
+-----------------------------------------------------------------------
+TEST 6 - Human-controlled decisions
+Expected: a case cannot be closed before a decision; a decision needs an outcome,
+          a reason and a next step; the AI cannot record a decision.
+Actual:   "Close case" was disabled before any decision. A decision with an empty
+          next step was refused (the decision stayed empty). "Do not follow the
+          request" was saved with its reason, next step and time.
+          AI check: the AI analysis of CASE-006 listed the "ignore your previous
+          instructions" text as a warning sign, and CASE-006 stayed New with no
+          decision. The record was byte-for-byte unchanged by the AI.
+Result:   PASS
+Fixes made: decisions previously had no next step. A required "Next step" field
+          was added, shown with the decision, logged and exported.
+
+-----------------------------------------------------------------------
+TEST 7 - Closing, changed evidence and reopening (follow_up_cards.txt, CASE-001)
+Expected: close after a decision; a closed case is locked; reopen; add the follow-up
+          card; revise the decision; close again; the history keeps both decisions.
+Actual:   Sequence logged: Imported -> Status changed -> Evidence note added ->
+          Decision recorded (Pause and verify) -> Case closed -> Case reopened ->
+          Evidence note added (source: recreated follow-up card) -> Decision changed
+          (Pause and verify -> Do not follow the request) -> Case closed.
+          While closed, there was no note or decision form.
+Result:   PASS
+Fixes made: none needed.
+
+-----------------------------------------------------------------------
+TEST 8 - Permanent investigation history
+Expected: earlier history entries never change, and there is no way to edit or
+          delete notes or history.
+Actual:   CASE-001's first history entries were identical after later activity. No
+          edit or delete buttons exist for notes or history.
+Result:   PASS
+Fixes made: none needed.
+
+-----------------------------------------------------------------------
+TEST 9 - Persistent local storage
+Expected: cases, notes, decisions and histories survive a page refresh and a server
+          restart.
+Actual:   The saved record was byte-for-byte identical after a refresh and after
+          stopping and restarting the server; all 6 cases were still in the inbox.
+Result:   PASS
+Fixes made: none needed.
+
+-----------------------------------------------------------------------
+TEST 10 - Readable text export
+Expected: "Export all" includes the export time, original reports, statuses,
+          decisions, reasons, next steps, evidence notes with sources and
+          investigation histories.
+Actual:   The export (8,354 characters) began "SECURITY CASE DESK - ALL CASES (6)",
+          included "Exported <time>", "ORIGINAL REPORT", "Status: Closed",
+          "Decision: Do not follow the request", "Reason:", "Next step: ...",
+          "(Source: recreated follow-up card)", "INVESTIGATION HISTORY" and
+          "Decision changed".
+Result:   PASS
+Fixes made: the next step and the note sources were added to the export.
+
+-----------------------------------------------------------------------
+NOT TESTED AUTOMATICALLY - please check manually
+- Your own investigations: the three cases you choose and the CASE-001 reopening
+  scenario. After saving them, open each case and check that the history shows
+  your notes, both decisions for the reopened case, and the closing/reopening.
+- Your final export: click "Export all (.txt)" and read the file once.
+- Screenshot 2 (an investigated case showing evidence and history): it must
+  show your own investigation, so it was not captured automatically.
+- Safari: the tests ran in Chrome. If you will present in Safari, open the app
+  in Safari once and import starter_cases.json.
+- The PDF's own test categories (see the note at the top).
+
+Other automated suites run on 22 Oct 2026 (see TESTING.md): import tests 33/33,
+opening from Finder 12/12, AI tests 41/42 (one AI-quality miss unrelated to these
+features).

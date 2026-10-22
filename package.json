@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server/server.mjs",
     "test:ai": "node tests/ai-tests.mjs",
-    "test:import": "node tests/import-tests.mjs"
+    "test:import": "node tests/import-tests.mjs",
+    "test:assignment": "node tests/assignment-tests.mjs"
   },
   "engines": {
     "node": ">=20.12"
