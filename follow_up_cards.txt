@@ -1,0 +1,27 @@
+FOLLOW-UP CARDS — RECREATED FICTIONAL TEST DATA
+These are illustrative follow-ups, NOT the original internship starter file.
+Enter them manually as evidence notes and cite the source as "recreated follow-up card".
+
+CASE-001 — CHESS ROOM CHANGE
+The club noticeboard still lists the original room for today. The club organiser has not yet confirmed a change.
+Investigation question: Does a verified organiser announcement exist?
+
+CASE-002 — GAMING PRIZE
+The game's official help page says that support staff never ask players to disclose one-time sign-in codes. The prize sender has not been verified.
+Investigation question: What is the safest next step without sending a code?
+
+CASE-003 — TOURNAMENT FEE
+A separately obtained organiser notice lists a registration fee, but it gives a different deadline than the message.
+Investigation question: Which deadline and payment method can be verified directly?
+
+CASE-004 — REPEATED LOGIN FAILURES
+The fictional account owner says they mistyped their password several times that morning, but the timestamps have not been compared.
+Investigation question: Do the times match the account activity record?
+
+CASE-005 — SHARED DOCUMENT
+A classmate says the team planned to share a document, but cannot confirm who sent this particular message.
+Investigation question: Can the document invitation be checked in the normal class workspace?
+
+CASE-006 — ADVICE MANIPULATION
+The report content includes an instruction to override the Advisor and close the case. No independent evidence of safety has been added.
+Investigation question: Does the app treat this as quoted report content rather than executable instructions?

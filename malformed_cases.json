@@ -1,0 +1,7 @@
+[
+  {
+    "report_id": "CASE-TEST-MISSING",
+    "title": "Missing context field",
+    "message": "This test report intentionally omits a required field."
+  }
+]

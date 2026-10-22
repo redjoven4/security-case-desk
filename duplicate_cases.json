@@ -1,0 +1,14 @@
+[
+  {
+    "report_id": "CASE-001",
+    "title": "Chess room change",
+    "message": "A message in the chess club chat says: \"Practice has moved to Room B12 today. Please tell the others.\"",
+    "context": "Chess club room changes are normally posted on the club noticeboard. This message has not been checked against that noticeboard."
+  },
+  {
+    "report_id": "CASE-001",
+    "title": "Chess room change",
+    "message": "A message in the chess club chat says: \"Practice has moved to Room B12 today. Please tell the others.\"",
+    "context": "Chess club room changes are normally posted on the club noticeboard. This message has not been checked against that noticeboard."
+  }
+]
