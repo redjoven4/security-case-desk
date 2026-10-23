@@ -1,6 +1,7 @@
 INVESTIGATION NOTES (proposed, then recorded at the user's request)
 ===============================================
-STATUS (22 Oct 2026): at the user's instruction, these investigations were
+STATUS (re-recorded 23 Oct 2026 with the refined interface; same steps and
+outcomes as 22 Oct): at the user's instruction, these investigations were
 RECORDED as written below, by the AI coding assistant, through the app's
 normal screens (Add note / Record decision / Close / Reopen) on a fresh desk.
 The app labels these actions "You" in the history. The resulting export is

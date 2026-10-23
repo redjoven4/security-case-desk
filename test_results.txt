@@ -151,7 +151,8 @@ Fixes:    the next step, note sources and the "Outcome" line were added to the
 RECORDED INVESTIGATIONS (submission run, not a test)
 The three investigations and the CASE-001 changed-evidence scenario were
 recorded on a fresh desk (headless Chrome, port 8093) through the app's own
-buttons by the AI coding assistant, at the user's instruction. The app logs
+buttons by the AI coding assistant, at the user's instruction (re-recorded on
+23 Oct 2026 with the refined interface; same steps and outcomes). The app logs
 these actions as "You". See proposed_investigations.txt. The checks of that run
 passed (6 of 6): the CASE-001 history keeps both decisions and the reopening;
 statuses CASE-001 Closed, CASE-002 Closed, CASE-003 Investigating, CASE-004 New,
