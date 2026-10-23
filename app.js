@@ -20,7 +20,7 @@
 
 (function () {
   "use strict";
-  const { KEYS, h, append, icon, clear, readJsonKey, writeJsonKey, formatTime, uid, deepFreeze, downloadText, toast, confirmClick } = window.DeskDom;
+  const { KEYS, h, append, icon, clear, readJsonKey, writeJsonKey, formatTime, uid, deepFreeze, downloadText, toast, confirmDialog } = window.DeskDom;
 
   // Per-file limits keep imports fast and safe. There is no limit on how many
   // files you import; only the browser's storage (several MB) caps the total.
@@ -536,8 +536,8 @@
             { type: "button", class: `case-card${justImported.has(c.id) ? " just-imported" : ""}`, "aria-current": c.id === selectedId ? "true" : null, onclick: () => selectCase(c.id) },
             h("span", { class: "case-card-top" }, h("span", { class: "case-id", text: c.id }), statusBadge(c.status)),
             h("span", { class: "case-card-title", text: c.original.title || preview(c.original.message, 60) }),
-            // "channel" is optional in the official format, so the line only appears when there is something to show
-            h("span", { class: "case-card-meta" }, h("span", { text: c.original.channel || "" }), decisionBadge(outcomeOf(c)))
+            // "channel" is optional in the official format, so it only appears when there is something to show
+            h("span", { class: "case-card-meta" }, decisionBadge(outcomeOf(c)), h("span", { class: "case-card-channel", text: c.original.channel || "" }))
           )
         )
       );
@@ -559,6 +559,18 @@
     );
   }
 
+  // Close asks for confirmation only when the case can actually be closed;
+  // otherwise closeCase explains what is missing, exactly as before.
+  async function confirmClose(c) {
+    if (closureProblems(c).length) return closeCase(c);
+    const ok = await confirmDialog({
+      title: `Close ${c.id}?`,
+      body: `The case will be closed with the outcome "${decisionLabel(outcomeOf(c).value)}". Notes and the decision are locked until it is reopened, and closing is recorded in the history.`,
+      confirmLabel: "Close case",
+    });
+    if (ok && findCase(c.id) === c && c.status !== "closed") closeCase(c);
+  }
+
   function caseHeader(c) {
     const actions = h("div", { class: "case-actions" });
     if (c.status === "new") {
@@ -573,12 +585,13 @@
           class: "btn primary",
           text: "Close case",
           title: "Close this case with the recorded decision",
-          onclick: () => closeCase(c),
+          onclick: () => confirmClose(c),
         })
       );
     }
     actions.append(h("button", { type: "button", class: "btn", onclick: () => exportCase(c) }, icon("i-download"), "Export case (.txt)"));
 
+    const lastUpdated = c.history.length ? c.history[c.history.length - 1].at : c.importedAt;
     return h(
       "header",
       { class: "case-header" },
@@ -590,9 +603,45 @@
         decisionBadge(outcomeOf(c))
       ),
       h("h2", { class: "case-title", text: c.original.title || "Untitled report" }),
+      h(
+        "p",
+        { class: "case-times" },
+        h("span", null, "Imported ", h("time", { datetime: c.importedAt, text: formatTime(c.importedAt) }), ` from ${c.source}`),
+        h("span", null, "Last updated ", h("time", { datetime: lastUpdated, text: formatTime(lastUpdated) }))
+      ),
       actions,
-      c.status !== "closed" && closureProblems(c).length ? h("p", { class: "muted small", text: `To close this case, add ${closureProblems(c).join(", ")}.` }) : null,
-      c.status === "closed" ? h("p", { class: "muted small", text: `Closed ${formatTime(c.closedAt)}. Reopen the case to add notes or change the decision.` }) : null
+      progressSteps(c),
+      c.status !== "closed" && closureProblems(c).length ? h("p", { class: "case-hint", text: `To close this case, add ${closureProblems(c).join(", ")}.` }) : null,
+      c.status === "closed" ? h("p", { class: "case-hint", text: `Closed ${formatTime(c.closedAt)}. Reopen the case to add notes or change the decision.` }) : null
+    );
+  }
+
+  // Workflow indicator, read straight from the case data. It only describes
+  // the record; it never changes a status or makes a decision.
+  function progressSteps(c) {
+    const d = outcomeOf(c);
+    const lastReopen = [...c.history].reverse().find((e) => e.action === "Case reopened");
+    const reopened = c.status !== "closed" && Boolean(lastReopen);
+    const steps = [
+      { label: "Imported", done: true, detail: formatTime(c.importedAt) },
+      { label: "Investigating", done: c.status !== "new", detail: "" },
+      { label: "Evidence reviewed", done: c.notes.length > 0, detail: c.notes.length ? plural(c.notes.length, "note") : "No notes yet" },
+      { label: "Decision recorded", done: Boolean(d.reason), detail: d.reason ? decisionLabel(d.value) : "Not yet" },
+      { label: "Closed", done: c.status === "closed", detail: c.status === "closed" ? formatTime(c.closedAt) : reopened ? `Reopened ${formatTime(lastReopen.at)}` : "" },
+    ];
+    const current = steps.findIndex((step) => !step.done);
+    return h(
+      "ol",
+      { class: `progress${reopened ? " is-reopened" : ""}`, "aria-label": "Investigation progress (from the case record)" },
+      steps.map((step, i) =>
+        h(
+          "li",
+          { class: `step${step.done ? " done" : ""}${i === current ? " current" : ""}${step.label === "Closed" && reopened ? " reopened" : ""}`, "aria-current": i === current ? "step" : null },
+          h("span", { class: "step-mark", "aria-hidden": "true" }, step.done ? icon("i-check") : null),
+          h("span", { class: "step-text" }, h("span", { class: "step-label", text: step.label }), step.detail ? h("span", { class: "step-detail", text: step.detail }) : null),
+          h("span", { class: "visually-hidden", text: step.done ? " (done)" : i === current ? " (next)" : " (not yet)" })
+        )
+      )
     );
   }
 
@@ -708,17 +757,69 @@
     return card("i-scale", "Decision", "Your call — the AI can't set this", current, form);
   }
 
-  function historyCard(c) {
-    const items = c.history.map((entry) =>
-      h(
-        "li",
-        { class: `actor-${entry.actor === "You" ? "you" : "system"}` },
-        h("time", { text: formatTime(entry.at) }),
-        h("p", null, h("strong", { text: entry.action }), entry.detail ? ` — ${entry.detail}` : ""),
-        h("span", { class: "actor", text: entry.actor })
-      )
+  const EVENT_KINDS = {
+    "Case created": { kind: "import", icon: "i-upload" },
+    Imported: { kind: "import", icon: "i-upload" },
+    "Status changed": { kind: "status", icon: "i-arrow" },
+    "Case closed": { kind: "status", icon: "i-lock" },
+    "Case reopened": { kind: "status", icon: "i-unlock" },
+    "Evidence note added": { kind: "note", icon: "i-note" },
+    "Decision recorded": { kind: "decision", icon: "i-scale" },
+    "Decision changed": { kind: "decision", icon: "i-scale" },
+  };
+
+  // "Outcome: A → B; Reason: "x" → "y"; Next step: …" → rows of [field, before, after].
+  // Anything that doesn't follow that pattern (e.g. older entries) is shown as plain text.
+  function decisionChanges(detail) {
+    const parts = [...detail.matchAll(/(Outcome|Reason|Next step): ([\s\S]*?)(?=; (?:Reason|Next step): |$)/g)];
+    if (!parts.length || parts.map((m) => m[0]).join("; ") !== detail) return null;
+    const unquote = (v) => (v === "(empty)" ? "" : v.replace(/^"([\s\S]*)"$/, "$1"));
+    return parts.map(([, field, value]) => {
+      const unchanged = /^(.*) \(unchanged\)$/.exec(value);
+      if (unchanged) return { field, before: null, after: unchanged[1], unchanged: true };
+      const pair = field === "Outcome" ? /^(.+?) → (.+)$/.exec(value) : /^("[\s\S]*"|\(empty\)) → ("[\s\S]*"|\(empty\))$/.exec(value);
+      return pair ? { field, before: unquote(pair[1]), after: unquote(pair[2]) } : { field, before: null, after: value };
+    });
+  }
+
+  function changeTable(rows) {
+    return h(
+      "dl",
+      { class: "changes" },
+      rows.flatMap((row) => [
+        h("dt", { text: row.field }),
+        h(
+          "dd",
+          null,
+          row.unchanged
+            ? [h("span", { class: "after", text: row.after }), h("span", { class: "unchanged", text: " (unchanged)" })]
+            : [
+                row.before !== null ? h("span", { class: "before", text: row.before || "(empty)" }) : null,
+                row.before !== null ? h("span", { class: "change-arrow", "aria-label": "changed to" }, icon("i-arrow")) : null,
+                h("span", { class: "after", text: row.after || "(empty)" }),
+              ]
+        ),
+      ])
     );
-    return card("i-clock", "Investigation history", "Automatic log · in time order", h("ol", { class: "history" }, items));
+  }
+
+  function historyCard(c) {
+    const items = c.history.map((entry) => {
+      const type = EVENT_KINDS[entry.action] || { kind: "other", icon: "i-clock" };
+      const changes = type.kind === "decision" && entry.detail ? decisionChanges(entry.detail) : null;
+      return h(
+        "li",
+        { class: `event event-${type.kind} actor-${entry.actor === "You" ? "you" : "system"}` },
+        h("span", { class: "event-icon", "aria-hidden": "true" }, icon(type.icon)),
+        h(
+          "div",
+          { class: "event-body" },
+          h("div", { class: "event-head" }, h("strong", { text: entry.action }), h("span", { class: "actor", text: entry.actor }), h("time", { datetime: entry.at, text: formatTime(entry.at) })),
+          changes ? changeTable(changes) : entry.detail ? h("p", { class: "event-detail", text: entry.detail }) : null
+        )
+      );
+    });
+    return card("i-clock", "Investigation history", `Automatic log · in time order · ${plural(c.history.length, "entry", "entries")}`, h("ol", { class: "history" }, items));
   }
 
   function renderCase() {
@@ -736,6 +837,7 @@
 
   function selectCase(id, { quiet } = {}) {
     if (id && !findCase(id)) id = null;
+    const changed = id !== selectedId;
     selectedId = id;
     try {
       id ? sessionStorage.setItem(KEYS.selected, id) : sessionStorage.removeItem(KEYS.selected);
@@ -743,6 +845,12 @@
       // private mode — fine
     }
     if (!quiet) renderAll();
+    if (!quiet && changed && id) {
+      els.record.scrollTop = 0;
+      els.caseView.classList.remove("entering");
+      void els.caseView.offsetWidth; // restart the fade
+      els.caseView.classList.add("entering");
+    }
     document.dispatchEvent(new CustomEvent("casedesk:select", { detail: { id } }));
     if (!quiet && id && window.matchMedia("(max-width: 900px)").matches) els.caseView.scrollIntoView({ behavior: "smooth" });
   }
@@ -809,12 +917,14 @@
     // Report IDs may contain spaces or slashes; keep the file name safe.
     const fileName = c.id.replace(/[^A-Za-z0-9_.-]+/g, "_").replace(/^[._]+/, "") || "case";
     downloadText(`${fileName}.txt`, `${exportHeader("CASE EXPORT")}\n${caseText(c)}\n`);
+    toast(`Exported ${c.id} as ${fileName}.txt (saved to your Downloads folder).`, "ok");
   }
 
   function exportAll() {
     if (!desk.cases.length) return toast("There are no cases to export yet.", "error");
     const stamp = new Date().toISOString().slice(0, 10);
     downloadText(`security-case-desk-${stamp}.txt`, `${exportHeader(`ALL CASES (${desk.cases.length})`)}\n${desk.cases.map(caseText).join("\n\n\n")}\n`);
+    toast(`Exported ${plural(desk.cases.length, "case")} as security-case-desk-${stamp}.txt (saved to your Downloads folder).`, "ok");
   }
 
   /* ---------------------------------------------------------------------
@@ -881,7 +991,14 @@
     importFile(event.dataTransfer.files[0]);
   });
 
-  confirmClick($("#reset-desk"), "Click again to delete ALL cases", () => {
+  $("#reset-desk").addEventListener("click", async () => {
+    const ok = await confirmDialog({
+      title: "Delete all cases?",
+      body: `This permanently deletes all ${plural(desk.cases.length, "case")}, their notes, decisions and history, and every AI conversation from this browser. It can't be undone. Export first if you want a copy.`,
+      confirmLabel: "Delete everything",
+      danger: true,
+    });
+    if (!ok) return;
     [KEYS.record, KEYS.aiChats, KEYS.aiAdvice].forEach((key) => {
       try {
         localStorage.removeItem(key);
@@ -895,6 +1012,11 @@
     selectCase(null);
     toast("Desk reset. All cases and AI conversations were deleted from this browser.", "ok");
   });
+
+  // Narrow windows scroll as one page; when the window widens back to the
+  // column layout (which scrolls per panel), drop the leftover page scroll.
+  const columns = window.matchMedia("(min-width: 821px)");
+  columns.addEventListener("change", () => columns.matches && window.scrollTo(0, 0));
 
   // Another tab changed the record → show the latest version here too.
   window.addEventListener("storage", (event) => {

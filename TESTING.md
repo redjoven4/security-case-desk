@@ -79,7 +79,7 @@ This needs Google Chrome installed, and Ollama running for test 8. It runs the d
 
 ## Manual browser tests
 
-Open <http://localhost:8090>. For a clean start, scroll to the bottom and click **Reset desk** twice.
+Open <http://localhost:8090>. For a clean start, click **Reset desk** at the bottom of the inbox and confirm with **Delete everything**.
 
 ### T1 — Ollama connection succeeds
 1. Look at the status pill. **Expected:** "AI Online — Qwen3 8B Ready".

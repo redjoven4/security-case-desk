@@ -137,5 +137,33 @@ window.DeskDom = (function () {
     });
   }
 
-  return Object.freeze({ KEYS, h, append, icon, clear, readJsonKey, writeJsonKey, formatTime, uid, deepFreeze, downloadText, toast, confirmClick });
+  // Confirmation dialog for significant actions (closing a case, deleting
+  // data). Resolves true only when the confirm button is pressed; Escape,
+  // Cancel or a click outside resolve false. Focus starts on Cancel for
+  // destructive actions so a stray Enter never deletes anything.
+  function confirmDialog({ title, body, confirmLabel, danger }) {
+    const dialog = document.getElementById("confirm-dialog");
+    if (!dialog || typeof dialog.showModal !== "function") return Promise.resolve(window.confirm(`${title}\n\n${body}`));
+    dialog.querySelector("#confirm-title").textContent = title;
+    dialog.querySelector("#confirm-body").textContent = body;
+    const ok = dialog.querySelector("[data-confirm]");
+    const cancel = dialog.querySelector("[data-cancel]");
+    ok.textContent = confirmLabel || "Confirm";
+    ok.className = `btn ${danger ? "danger" : "primary"}`;
+    return new Promise((resolve) => {
+      const finish = (result) => {
+        ok.onclick = cancel.onclick = dialog.onclick = dialog.onclose = null;
+        if (dialog.open) dialog.close();
+        resolve(result);
+      };
+      ok.onclick = () => finish(true);
+      cancel.onclick = () => finish(false);
+      dialog.onclick = (event) => event.target === dialog && finish(false);
+      dialog.onclose = () => finish(false);
+      dialog.showModal();
+      (danger ? cancel : ok).focus();
+    });
+  }
+
+  return Object.freeze({ KEYS, h, append, icon, clear, readJsonKey, writeJsonKey, formatTime, uid, deepFreeze, downloadText, toast, confirmClick, confirmDialog });
 })();

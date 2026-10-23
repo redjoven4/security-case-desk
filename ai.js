@@ -25,11 +25,10 @@
   const dom = window.DeskDom;
   if (!desk || !dom) return; // the desk itself failed to load — nothing to attach to
 
-  const { KEYS, h, append, icon, clear, readJsonKey, writeJsonKey, formatTime, uid, toast, confirmClick } = dom;
+  const { KEYS, h, append, icon, clear, readJsonKey, writeJsonKey, formatTime, uid, toast, confirmClick, confirmDialog } = dom;
   const $ = (selector) => document.querySelector(selector);
   const els = {
     statusGlobal: $("#ai-status-global"),
-    statusPanel: $("#ai-status-panel"),
     help: $("#ai-help"),
     check: $("#ai-check"),
     mascot: $("#ai-mascot"),
@@ -145,7 +144,7 @@
   function renderStatus() {
     const state = job ? "busy" : connection.state;
     const text = STATUS_TEXT[state](connection.model);
-    for (const el of [els.statusGlobal, els.statusPanel]) {
+    for (const el of [els.statusGlobal]) {
       el.dataset.state = state;
       el.querySelector(".text").textContent = text;
     }
@@ -234,15 +233,58 @@
     ];
   }
 
-  function renderAnalysisSections(text) {
+  // Finished analyses show each section as a collapsible block (the overall
+  // assessment starts open); while streaming everything stays expanded.
+  const openSections = {}; // caseId → { heading: open? }, so re-renders keep what the user expanded
+  function renderAnalysisSections(text, { collapsible } = {}) {
+    const remembered = (openSections[currentId] ||= {});
     const fragment = document.createDocumentFragment();
     parseBlocks(text).forEach((section) => {
       const nodes = section.nodes.flatMap(uncertaintyRow).filter(Boolean);
       if (!section.heading) return fragment.append(h("div", { class: "ai-section plain" }, nodes));
       const known = SECTIONS.find((s) => s.match.test(section.heading)) || { kind: "plain", icon: "i-sparkle" };
-      fragment.append(h("section", { class: `ai-section ${known.kind}` }, h("h4", null, icon(known.icon), section.heading), nodes));
+      const heading = h("h4", null, icon(known.icon), section.heading);
+      if (!collapsible) return fragment.append(h("section", { class: `ai-section ${known.kind}` }, heading, nodes));
+      const details = h(
+        "details",
+        { class: `ai-section ${known.kind}`, open: remembered[section.heading] ?? known.kind === "overall" },
+        h("summary", null, heading, icon("i-chevron", "chevron")),
+        h("div", { class: "ai-section-body" }, nodes)
+      );
+      details.addEventListener("toggle", () => (remembered[section.heading] = details.open));
+      fragment.append(details);
     });
     return fragment;
+  }
+
+  // Compact summary built only from the AI's own words: the first point of its
+  // warning-signs, missing-information and verification sections. Nothing is
+  // added, scored or claimed as checked.
+  function analysisSummary(text) {
+    const sections = parseBlocks(text);
+    const first = (kind) => {
+      const section = sections.find((s) => s.heading && SECTIONS.find((k) => k.match.test(s.heading))?.kind === kind);
+      const node = section?.nodes.find((n) => n.tagName === "UL" || n.tagName === "P");
+      const item = node?.tagName === "UL" ? node.querySelector("li") : node;
+      return item ? item.textContent.trim() : "";
+    };
+    const rows = [
+      ["Main concern", first("warning")],
+      ["Missing evidence", first("missing")],
+      ["Suggested verification", first("verify")],
+    ];
+    if (rows.every(([, value]) => !value)) return null;
+    return h(
+      "section",
+      { class: "ai-summary", "aria-label": "AI assessment summary" },
+      h("div", { class: "ai-summary-head" }, h("span", { class: "ai-summary-title", text: "AI assessment summary" }), h("span", { class: "badge unverified", text: "Advisory · unverified" })),
+      h(
+        "dl",
+        null,
+        rows.flatMap(([label, value]) => [h("dt", { text: label }), h("dd", { class: value ? null : "muted", text: value || "Not stated in the analysis." })])
+      ),
+      h("p", { class: "ai-summary-note", text: "First point of each section below, in the AI's words. The AI cannot check facts; verify before relying on it." })
+    );
   }
 
   // A heads-up when the AI's wording claims checks or certainty it can't have.
@@ -314,7 +356,7 @@
     if (live) {
       const text = cleanAnswer(live.text);
       els.analysis.append(
-        h("div", { class: "advice-banner" }, icon("i-sparkle"), "AI suggestion — advisory only. You make the decision."),
+        h("div", { class: "advice-banner" }, icon("i-sparkle"), "AI suggestion — advisory and not verified. You make the decision."),
         text ? h("div", { class: "ai-sections streaming" }, renderAnalysisSections(text), h("span", { class: "caret", "aria-hidden": "true" })) : thinkingIndicator(live.thinking ? "Qwen3 is reasoning about the case…" : "Reading the original report…")
       );
       return;
@@ -334,9 +376,10 @@
     const isSaved = (advice[currentId] || []).some((a) => a.text === saved.text);
     append(
       els.analysis,
-      h("div", { class: "advice-banner" }, icon("i-sparkle"), "AI suggestion — advisory only. You make the decision."),
+      h("div", { class: "advice-banner" }, icon("i-sparkle"), "AI suggestion — advisory and not verified. You make the decision."),
       overclaimNotice(saved.text),
-      h("div", { class: "ai-sections" }, renderAnalysisSections(saved.text)),
+      analysisSummary(saved.text),
+      h("div", { class: "ai-sections" }, renderAnalysisSections(saved.text, { collapsible: true })),
       saved.cancelled ? h("p", { class: "muted small", text: "Cancelled — this is a partial answer." }) : null,
       saved.truncated ? h("p", { class: "muted small", text: "The answer reached its length limit and may be cut off." }) : null,
       h(
@@ -617,11 +660,19 @@
     }
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && job) job.controller.abort();
+    if (event.key === "Escape" && job && !document.querySelector("dialog[open]")) job.controller.abort();
   });
 
-  confirmClick(els.clearChat, "Click again to clear", () => {
+  els.clearChat.addEventListener("click", async () => {
     if (!currentId) return;
+    const id = currentId;
+    const ok = await confirmDialog({
+      title: `Clear the AI conversation for ${id}?`,
+      body: "The AI analysis and follow-up questions for this case are deleted from this browser. Saved AI advice, your notes, the decision and the history are not affected.",
+      confirmLabel: "Clear conversation",
+      danger: true,
+    });
+    if (!ok || id !== currentId) return;
     delete chats[currentId];
     saveChats();
     errorNote = null;

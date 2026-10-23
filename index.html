@@ -55,6 +55,9 @@
   <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></symbol>
   <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.5L7 20z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 8a7.5 7.5 0 10.9 6M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V8a4 4 0 017.6-1.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m0 0l-5-5m5 5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
 </svg>
 
@@ -89,6 +92,7 @@
       <h2 id="inbox-title">Case inbox</h2>
       <span class="count" id="inbox-total">0</span>
     </div>
+    <div class="inbox-controls">
     <div class="filters" role="group" aria-label="Filter cases by status">
       <button type="button" class="filter" data-filter="all" aria-pressed="true">All <span>0</span></button>
       <button type="button" class="filter" data-filter="new" aria-pressed="false">New <span>0</span></button>
@@ -100,6 +104,7 @@
       <span class="visually-hidden">Search cases</span>
       <input type="search" id="case-search" placeholder="Search cases" title="Searches the ID, title, sender, channel, background, message and any extra fields" autocomplete="off">
     </label>
+    </div>
     <ul class="case-list" id="case-list"></ul>
     <p class="inbox-empty" id="inbox-empty">No cases yet. Import a JSON report, or load the sample cases.</p>
     <p class="drop-hint">Tip: you can also drop a .json file anywhere on the page.</p>
@@ -130,13 +135,7 @@
             <h2 id="ai-title">AI Security Analyst</h2>
             <p>Advisory only · runs on this Mac · cannot change the case</p>
           </div>
-        </div>
-
-        <div class="ai-status-row">
-          <div class="ai-status" id="ai-status-panel" data-state="checking" role="status" aria-live="polite">
-            <span class="dot" aria-hidden="true"></span><span class="text">Checking local AI…</span>
-          </div>
-          <button type="button" class="btn small" id="ai-check"><svg class="icon"><use href="#i-refresh"/></svg> Check Connection</button>
+          <button type="button" class="btn small icon-only" id="ai-check" aria-label="Check Connection" title="Check Connection (the AI status is shown in the top bar)"><svg class="icon"><use href="#i-refresh"/></svg></button>
         </div>
         <p class="ai-help" id="ai-help" hidden></p>
 
@@ -206,6 +205,16 @@
   </div>
 </dialog>
 
+
+<!-- CONFIRMATION (closing a case, deleting data) -->
+<dialog id="confirm-dialog" class="guide confirm" aria-labelledby="confirm-title" aria-describedby="confirm-body">
+  <h2 id="confirm-title"></h2>
+  <p id="confirm-body"></p>
+  <div class="row confirm-actions">
+    <button type="button" class="btn" data-cancel>Cancel</button>
+    <button type="button" class="btn primary" data-confirm>Confirm</button>
+  </div>
+</dialog>
 
 <script src="dom.js"></script>
 <script src="app.js"></script>
