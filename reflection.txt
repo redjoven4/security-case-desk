@@ -3,7 +3,7 @@ Reflection - Security Case Desk
 1. Real bug: importing a report in the assignment's format failed with "Report 1 - Missing 'id'".
 2. Cause: the importer used its own field names ("id", "background"), so the official "report_id" and "context" were treated as unknown fields.
 3. Fix: the importer now requires report_id, title, message and context, still accepts the older names, and checks the whole file before importing anything.
-4. A second mismatch: the app's outcomes and closure rules differed from the PDF. They were changed to Concern supported / Benign explanation supported / Unresolved, with every case starting Unresolved and closure requiring a reason, a next step and evidence.
+4. A second mismatch: the app's outcomes and closure rules differed from the PDF. They were changed to Concern supported / Harmless explanation supported (the PDF's "Benign", in plainer words) / Unresolved, with every case starting Unresolved and closure requiring a reason, a next step and evidence.
 5. The history now records previous and new values and is shown in time order.
 6. Verification: the eight PDF self-checks were automated in a real browser with the supplied starter files (27 of 27 checks passed).
 7. Remaining limitation: cases are stored in the browser's localStorage, so clearing browser data erases them unless exported first.

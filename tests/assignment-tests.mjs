@@ -241,8 +241,8 @@ try {
   const f1 = fileCases.find((f) => f.report_id === "CASE-001");
   check("6. After reopening and changing the decision, the original report is intact", c1.original.message === f1.message && c1.original.context === undefined && c1.original.background === f1.context && c1.original.title === f1.title);
   const changed = c1.history.find((h) => h.action === "Decision changed");
-  check("6. History keeps old and new outcome, reason and next step", /Outcome: Benign explanation supported → Concern supported/.test(changed?.detail || "") && /Reason: "A room change is ordinary/.test(changed.detail) && /→ "The noticeboard contradicts/.test(changed.detail) && /Next step: "Check the noticeboard before going\." → "Don't pass it on/.test(changed.detail), (changed?.detail || "").slice(0, 120));
-  check("6. History shows close, reopen (outcome kept) in time order", (() => { const a = c1.history.map((h) => h.action); const t = c1.history.map((h) => h.at); return a.includes("Case closed") && c1.history.some((h) => h.action === "Case reopened" && /Outcome kept: Benign/.test(h.detail)) && t.every((x, i) => i === 0 || t[i - 1] <= x); })());
+  check("6. History keeps old and new outcome, reason and next step", /Outcome: Harmless explanation supported → Concern supported/.test(changed?.detail || "") && /Reason: "A room change is ordinary/.test(changed.detail) && /→ "The noticeboard contradicts/.test(changed.detail) && /Next step: "Check the noticeboard before going\." → "Don't pass it on/.test(changed.detail), (changed?.detail || "").slice(0, 120));
+  check("6. History shows close, reopen (outcome kept) in time order", (() => { const a = c1.history.map((h) => h.action); const t = c1.history.map((h) => h.at); return a.includes("Case closed") && c1.history.some((h) => h.action === "Case reopened" && /Outcome kept: Harmless/.test(h.detail)) && t.every((x, i) => i === 0 || t[i - 1] <= x); })());
   const shownOrder = await page(`return [...document.querySelectorAll(".history li strong")].map(s => s.textContent)`);
   check("6. The history is displayed oldest first", shownOrder[0] === "Case created" && shownOrder.at(-1) === "Decision changed", shownOrder.join(" → "));
 
@@ -271,7 +271,7 @@ try {
     const end = block.indexOf("\n\n\n");
     const b = end > 0 ? block.slice(0, end) : block;
     const historyLines = (b.split("INVESTIGATION HISTORY")[1] || "").split("\n").filter((l) => /^\[.+\] (You|System):/.test(l)).length;
-    return { id: c.id, ok: b.includes(`Status:   ${({ new: "New", investigating: "Investigating", closed: "Closed" })[c.status]}`) && b.includes(`Outcome:  ${({ concern: "Concern supported", benign: "Benign explanation supported", unresolved: "Unresolved" })[c.decision.value]}`) && c.notes.every((n2) => b.includes(n2.text)) && historyLines === c.history.length };
+    return { id: c.id, ok: b.includes(`Status:   ${({ new: "New", investigating: "Investigating", closed: "Closed" })[c.status]}`) && b.includes(`Outcome:  ${({ concern: "Concern supported", benign: "Harmless explanation supported", unresolved: "Unresolved" })[c.decision.value]}`) && c.notes.every((n2) => b.includes(n2.text)) && historyLines === c.history.length };
   });
   check("8. Export shows the time and the case count", /^SECURITY CASE DESK — ALL CASES \(6\)/m.test(all) && /^Exported /m.test(all));
   check("8. Export matches the app for every case (status, outcome, notes, number of history entries)", perCase.every((x) => x.ok), perCase.filter((x) => !x.ok).map((x) => x.id).join(",") || "all 6 match");

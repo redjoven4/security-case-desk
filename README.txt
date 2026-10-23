@@ -21,7 +21,7 @@ MAIN FEATURES
 - Case statuses: New, Investigating, Closed (with inbox filters and search).
 - Evidence notes with a timestamp and a required source. Notes cannot be
   edited or deleted; add a new note to correct one.
-- Human decisions with three outcomes: Concern supported / Benign explanation
+- Human decisions with three outcomes: Concern supported / Harmless explanation
   supported / Unresolved. Every case starts as Unresolved. Each decision needs
   a reason and a safe next step.
 - Closing needs a reason, a next step and at least one evidence note. An

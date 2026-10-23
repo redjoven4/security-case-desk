@@ -58,7 +58,7 @@
       meaning: "The evidence supports a security concern.",
     },
     benign: {
-      label: "Benign explanation supported",
+      label: "Harmless explanation supported",
       meaning: "The evidence supports a harmless explanation.",
     },
     unresolved: {

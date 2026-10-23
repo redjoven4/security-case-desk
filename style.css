@@ -706,7 +706,7 @@ details.ai-section > summary:hover h4 { color: var(--accent); }
     *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-/* Assignment outcomes: Concern supported / Benign explanation supported / Unresolved */
+/* Assignment outcomes: Concern supported / Harmless explanation supported ("benign") / Unresolved */
 .badge.decision-concern::before { background: #C4675B; }
 .badge.decision-benign::before { background: #4E9A7E; }
 .badge.decision-unresolved::before { background: #C8902E; }

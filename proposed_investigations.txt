@@ -15,8 +15,9 @@ The reports come from starter_cases.json. Follow-up evidence comes from
 follow_up_cards.txt, which describes itself as recreated fictional test data;
 it is cited with the source "recreated follow-up card", as that file asks.
 
-Outcomes available in the app (from the assignment PDF):
-  Concern supported | Benign explanation supported | Unresolved
+Outcomes available in the app (from the assignment PDF, with "Benign" worded
+as "Harmless"):
+  Concern supported | Harmless explanation supported | Unresolved
 Every case starts as Unresolved. Closing needs a reason, a next step and at
 least one evidence note; an Unresolved case also needs a note explaining what
 is missing and the next step.

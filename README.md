@@ -17,7 +17,7 @@ A security investigation desk for message-based reports: phishing emails, gaming
 | Case inbox with status filters (All / New / Investigating / Closed) and search | Left column |
 | Original case information (read-only, never edited) | "Original report" card |
 | Evidence notes (yours, timestamped, can't be edited or deleted) | "Evidence notes" card |
-| Manual outcome: *Concern supported* / *Benign explanation supported* / *Unresolved* (every case starts Unresolved), with a reason and a safe next step | "Decision" card |
+| Manual outcome: *Concern supported* / *Harmless explanation supported* / *Unresolved* (every case starts Unresolved), with a reason and a safe next step | "Decision" card |
 | Investigation history (automatic log of every action) | "Investigation history" card |
 | Saved in the browser (localStorage) — survives restarts | automatic |
 | Close and reopen cases (closing needs a reason, a next step and at least one evidence note; an Unresolved case also needs a note explaining what is missing and the next step) | Buttons at the top of a case |
@@ -27,7 +27,7 @@ A security investigation desk for message-based reports: phishing emails, gaming
 ### The three outcomes
 
 - **Concern supported** — the evidence supports a security concern.
-- **Benign explanation supported** — the evidence supports a harmless explanation.
+- **Harmless explanation supported** — the evidence supports a harmless explanation.
 - **Unresolved** — the supplied facts don't settle it yet. Every case starts here. To close an Unresolved case, first add an evidence note explaining what information is missing and the next step.
 
 Every change of outcome, reason or next step is logged in the history with the old and new values; the history is shown in time order (oldest first).
@@ -152,7 +152,7 @@ Your cases are saved in the browser, so nothing is lost when you stop the server
 ## Using the AI Security Analyst
 
 - **Analyse Case** sends only the case's *original report* (title, channel, sender as displayed, reported by, received time, background and message) to Qwen3 8B. It does **not** send your notes or your decision, so the AI can't simply copy you.
-- The answer has five sections: **Potential warning signs**, **Possible benign explanations**, **Missing information**, **Recommended verification**, **Overall assessment**. The assessment ends with an **Uncertainty** rating (low, medium or high) and the reason for it.
+- The answer has five sections: **Potential warning signs**, **Possible harmless explanations**, **Missing information**, **Recommended verification**, **Overall assessment**. The assessment ends with an **Uncertainty** rating (low, medium or high) and the reason for it.
 - It works on any imported case, not just the samples. It's told to work out what kind of report it is (email, gaming chat, payment request, phone call…) and to use that report's own details. Any extra fields in your file (for example `subject`) are given to it too.
 - **Cancel** (or the **Esc** key) stops an analysis straight away. Clicking Analyse again while it is working does nothing — only one request runs at a time.
 - **Follow-up questions**: a normal conversation about the case. Ask a question, ask for wording for your report ("How should I say this?"), ask it to explain more simply or more briefly, disagree with it, or give it new information ("I checked with the coach and…"). It remembers the whole conversation for that case. It also thinks briefly before each reply, so expect about 10–20 seconds per answer while the robot shows "Thinking…". Each case has its own conversation, saved in the browser. **Clear AI conversation** deletes it for that case only.

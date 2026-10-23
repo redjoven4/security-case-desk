@@ -31,7 +31,7 @@ const cases = Object.fromEntries(reportsIn(JSON.parse(await fs.readFile(path.joi
 
 const results = [];
 const answers = [];
-const HEADINGS = ["Potential warning signs", "Possible benign explanations", "Missing information", "Recommended verification", "Overall assessment"];
+const HEADINGS = ["Potential warning signs", "Possible harmless explanations", "Missing information", "Recommended verification", "Overall assessment"];
 
 function check(name, pass, detail = "") {
   results.push({ name, pass, detail });

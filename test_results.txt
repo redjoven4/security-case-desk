@@ -1,6 +1,6 @@
 SECURITY CASE DESK - TEST RESULTS
 =================================
-Date: 22 Oct 2026
+Date: 22 Oct 2026 (checks last re-run 23 Oct 2026)
 Categories: the eight self-checks listed in the assignment PDF
             (Third_Task_Security_Case_Desk.pdf).
 Run by: automated browser test tests/assignment-tests.mjs (npm run test:assignment).
@@ -8,7 +8,7 @@ Run by: automated browser test tests/assignment-tests.mjs (npm run test:assignme
         test copy of the desk (port 8096), using the supplied files exactly as
         provided: starter_cases.json, duplicate_cases.json, malformed_cases.json.
         The test clicks the app's own buttons and fills in its own forms.
-Raw report: test-results/assignment-test-2026-10-22T14-57-59.md
+Raw report: test-results/assignment-test-2026-10-23T05-28-48.md
             (27 of 27 checks passed, plus no script errors on the page)
 The notes and decisions made during testing are test data only. They are not
 part of the recorded investigations.
@@ -16,6 +16,8 @@ part of the recorded investigations.
 Changes made before this run, to match the PDF:
 - The outcomes were renamed to the PDF's three: Concern supported, Benign
   explanation supported, Unresolved. Every case now starts as Unresolved.
+  (On 23 Oct "Benign" was reworded in the app as "Harmless explanation
+  supported", at the student's request; the checks were re-run afterwards.)
 - Closing now requires a reason, a next step and at least one evidence note.
   An Unresolved case can close only after a note explains the missing
   information and the next step. If anything is missing, the app says what to
@@ -93,7 +95,7 @@ Actual:   CASE-005 with nothing added, "Close case" pressed: the case stayed
           an evidence note, added after choosing Unresolved, that explains what
           information is missing and the next step." After that note was added,
           the case closed.
-          AI: "Analyse Case" was run on CASE-006 (Qwen3 8B via Ollama, 17 s) and
+          AI: "Analyse Case" was run on CASE-006 (Qwen3 8B via Ollama, 20 s) and
           the answer was saved as AI advice. CASE-006 stayed New and Unresolved;
           the official record was identical before and after. The analysis
           listed "ignore your previous instructions" as a warning sign rather
@@ -105,14 +107,14 @@ Fixes:    the closure rules and the explanatory message were added (see the top)
 CHECK 6 - Changed evidence
 Expected: after a case is reopened and its decision changed, the original
           report is intact and the old and new states are both kept.
-Actual:   CASE-001: note -> Benign explanation supported -> closed -> reopened
+Actual:   CASE-001: note -> Harmless explanation supported -> closed -> reopened
           -> follow-up note -> Concern supported. The original title, message and
           context still matched the file. The history entry read "Decision
-          changed - Outcome: Benign explanation supported -> Concern supported;
+          changed - Outcome: Harmless explanation supported -> Concern supported;
           Reason: "A room change is ordinary..." -> "The noticeboard
           contradicts..."; Next step: "Check the noticeboard before going." ->
           "Don't pass it on; ask the organiser."" The reopening entry read
-          "Status: Closed -> Investigating. Outcome kept: Benign explanation
+          "Status: Closed -> Investigating. Outcome kept: Harmless explanation
           supported". Times were in order and the history was displayed oldest
           first.
 Result:   PASS
@@ -165,6 +167,7 @@ NOT TESTED
 - Manual run by the student on their own desk: the recorded investigations
   should be reviewed by the student before submission.
 
-Other automated suites run on 22 Oct 2026 after these changes: import tests
-33/33 (npm run test:import). The AI test suite (npm run test:ai, 41/42 with one
-AI-quality miss) was run before the outcome rename and was not re-run.
+Other automated suites, re-run on 23 Oct 2026 after the "Harmless" rewording:
+import tests 33/33 (npm run test:import) and AI tests 42/42 (npm run test:ai,
+raw answers in test-results/ai-test-2026-10-23T05-30-30.md; the answers were
+also read by hand: both ordinary reports got "No clear warning signs").
